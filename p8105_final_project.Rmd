@@ -1,0 +1,81 @@
+---
+title: "p8105_final_project"
+output: html_document
+date: "2025-11-06"
+---
+
+# Proposal
+
+## 1. Group member:
+Linqi Chu	LC4052
+Chenchen Ma	cm4671
+Hongda Chen	hc3653
+Mutian Li	ml5308
+
+## 2. The tentative project title: 
+Citi Bike Usage Patterns: A Data-Driven Analysis of New York's Bike-Sharing System
+
+## 3. Motivation: 
+New York City's Citi Bike system has become an integral part of the urban transportation landscape, with over 25,000 bikes and 1,500 stations serving millions of riders annually across Manhattan, Brooklyn, Queens, and the Bronx. Since its launch in 2013, the system has transformed how New Yorkers navigate the city, offering a flexible alternative that fills the gap between subway transit and walking. The year 2024 is particularly meaningful as the system continues to expand its fleet and coverage across New York City. 
+In this project, we study Citi Bike usage patterns throughout 2024 to capture membership, seasonal changes, weather influences, commuter versus leisure patterns, and the effects of holidays or large events. Comparing monthly data enables us to identify peak demand periods, user behavioral trends, and potential supply-demand imbalances. By analyzing these trends and visualizing key performance metrics, the findings will inform strategies for system improvements including rebalancing, infrastructure planning, and initiatives that encourage further adoption of sustainable urban mobility.
+
+## 4. Intended final products: 
+1. Report: 
+1)Explore data analysis (visualization) : We will compare Citi Bike usage across all 12 months of 2024 using visualizations such as maps and time-series plots. The map will display station-level usage intensity, while line charts will illustrate how weather factors (temperature, humidity, and precipitation) relate to trip volume and duration over time.
+2)Model selection: 
+The first model will use a multiple linear regression framework to examine whether ride duration is influenced by environmental and user-related factors, including temperature, humidity, bike type (classic or electric), and user type (member or casual).  This model will help quantify how these variables affect cycling time. 
+The second model will focus on time-series analysis of the daily average ride duration across 2024.  By treating the daily mean duration as a sequential variable, we aim to capture temporal patterns, such as seasonal or weekly fluctuations, and assess whether a time-series model (e.g., ARIMA or Prophet) can effectively describe or forecast these trends.
+
+2. Webpage:
+1)Home page 
+2)Introduction (Screencast)
+3)Exploratory Data Analysis
+4)Analysis
+5)Shinny app (dashboard)
+6)Discussion
+
+## 5. Anticipated data sources:
+Citi Bike System Data — official public dataset
+"https://s3.amazonaws.com/tripdata/index.html "
+"https://citibikenyc.com/system-data" 
+"https://open-meteo.com/"
+  
+## 6. Analysis & Visualizations
+1. Temporal Patterns
+Daily usage trends and peak hour identification (hourly distribution)
+Seasonal variations (ridership comparison across months throughout 2024)
+2. User Behavior Analysis
+Member vs. casual rider differences (trip duration, usage frequency, and patterns)
+Trip duration and distance distributions over time
+3. Bike Type Comparison
+Usage patterns: electric bikes vs. classic bikes
+4.Geographic and Station Analysis
+Station utilization rates (map visualization)
+Top 20 most popular stations
+Popular routes (start and end station combinations)
+Station flow imbalances (identifying stations requiring more resources or rebalancing efforts)
+
+## 7. Challenges: 
+1. the citi bike dataset is massive, leading to slow processing and complex data cleaning：The Citi Bike dataset is of massive scale, generating millions of individual trip records annually. This volume leads to slow data processing and delays in complex analyses. When loading raw data into visualization tools, issues such as lagging or crashes are common, requiring additional pre-aggregation steps. Additionally, the dataset faces challenges related to complex data cleaning, including missing station information, anomalous trip durations, and other quality issues. Notably, the larger the dataset scale, the greater the difficulty in addressing these problems.
+2. the data is affected by mutliple confounding factors, like weather, holidays and etc., makeing it difficult to distinguish true anomalies from normal variations
+From the perspective of weather, rainfall, snowfall, or extreme high/low temperatures directly lead to a sharp drop in ridership. For instance, during heavy rain, the ridership in Manhattan may decrease significantly compared to regular days. This short-term and significant fluctuation caused by weather can easily be confused with ridership anomalies resulting from system failures  Holidays also have a notable impact: during holidays like Christmas and Independence Day in New York City, commuting-related ridership drops sharply. Additionally, large-scale events like the New York City Marathon  temporarily trigger local ridership booms or ridership declines due to traffic controls. The existence of these confounding factors means that it is difficult to accurately define the nature of anomalies solely based on changes in ridership values. 
+
+## 8.The planned timeline
+November 7-10: Data collection, cleaning, and preliminary exploration.
+November 11-16: In-depth analyses
+November 17-25: Extended analyses and model refinement 
+November 26-30: Finalize analyses and begin drafting the report.
+December 1-7: Complete the draft webpage with visualizations and interpretation.
+December 6: Review and finalize the project for submission
+
+
+
+
+
+
+
+
+
+
+
+
