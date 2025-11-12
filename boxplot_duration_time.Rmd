@@ -1,0 +1,50 @@
+---
+title: "boxplot_duration_time"
+author: "Hongda Chen"
+date: "2025-11-12"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(plotly)
+```
+
+# import the data
+```{r}
+citibike_sample_12k = 
+  read.csv("/Users/hongdachen/Desktop/citibike_sample_12k.csv")
+```
+
+# clean the data
+```{r}
+citibike_boxplot <- citibike_sample_12k %>%
+  mutate(
+    started_at = ymd_hms(started_at),
+    ended_at = ymd_hms(ended_at),
+    duration_min = as.numeric(difftime(ended_at, started_at, units = "mins")),
+    month = month(started_at, label = TRUE, abbr = TRUE)) %>%
+  filter(duration_min > 0, duration_min < 200)
+```
+
+# boxplot 
+```{r}
+plot_ly(
+  data = citibike_boxplot,
+  x = ~month,
+  y = ~duration_min,
+  type = "box",
+  color = ~month,
+  colors = "viridis",
+  boxpoints = "outliers",  
+  marker = list(
+    size = 6,       
+    opacity = 1  
+  ),
+  line = list(width = 1)    
+) %>%
+  layout(
+    title = "Monthly Ride Duration Distribution (Citibike)",
+    xaxis = list(title = "Month"),
+    yaxis = list(title = "Ride Duration (minutes)")
+  )
+```
