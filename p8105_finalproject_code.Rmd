@@ -1,0 +1,86 @@
+---
+title: "p8105_finalproject_code"
+output: html_document
+date: "2025-11-12"
+---
+
+```{r}
+data01 <- read.csv("~/Desktop/STA-HW/p8105_final_project/Data/202401-citibike-tripdata/202401-citibike-tripdata_1.csv")
+```
+
+```{r}
+library(readr)
+library(dplyr)
+library(purrr)
+```
+
+```{r}
+# build file paths for Jan–Dec 2024
+months <- sprintf("%02d", 1:12)
+
+file_paths <- file.path(
+  "~/Desktop/STA-HW/p8105_final_project/Data",
+  paste0("2024", months, "-citibike-tripdata"),
+  paste0("2024", months, "-citibike-tripdata_1.csv")
+)
+
+file_paths
+```
+
+```{r}
+library(readr)
+library(dplyr)
+library(purrr)
+
+set.seed(42)
+
+months <- sprintf("%02d", 1:12)
+file_paths <- file.path(
+  path.expand("~/Desktop/STA-HW/p8105_final_project/Data"),
+  paste0("2024", months, "-citibike-tripdata"),
+  paste0("2024", months, "-citibike-tripdata_1.csv")
+)
+
+sample_1k_readr <- function(path) {
+  # Read all columns as character to avoid parsing issues
+  df <- read_csv(
+    path,
+    col_types = cols(.default = col_character()),
+    show_col_types = FALSE,
+    guess_max = 100000
+  )
+  # optional: check parsing issues
+  # if (nrow(problems(df)) > 0) print(problems(df))
+
+  n_take <- min(1000L, nrow(df))  # <-- plain integer, computed first
+  if (n_take == 0L) return(df[0, ])  # empty file guard
+  dplyr::slice_sample(df, n = n_take)
+}
+
+citibike_sample_12k <- map_dfr(file_paths, sample_1k_readr)
+
+```
+
+```{r}
+citibike_sample_12k
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
