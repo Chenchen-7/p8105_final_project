@@ -1,0 +1,172 @@
+---
+title: '1'
+output: github_document
+date: "2025-11-12"
+---
+
+```{r}
+library(tidyverse)
+library(lubridate)
+
+# 1. 导入数据
+# =================================================
+data <- read_csv("202403-citibike-tripdata_2.csv")
+
+# View data structure
+glimpse(data)
+
+# 2. Data Preprocessing
+# ===========================================================
+# Calculate ride duration in minutes
+data =
+  data |>
+  mutate(
+    started_at = ymd_hms(started_at),
+    ended_at = ymd_hms(ended_at),
+    duration_min = as.numeric(difftime(ended_at, started_at, units = "mins"))
+  )
+
+# Filter out anomalies (duration between 0 and 1440 minutes)
+data_clean =
+  data |>
+  filter(duration_min > 0 & duration_min < 1440)
+
+# 3. Bike Type Comparison: Usage and Duration
+# ===========================================================
+
+cat("\n===== Bike Type Comparison Summary =====\n")
+
+# Overall comparison statistics
+bike_comparison =
+  data_clean |>
+  group_by(rideable_type) |>
+  summarise(
+    total_rides = n(),
+    mean_duration_min = mean(duration_min, na.rm = TRUE),
+    median_duration_min = median(duration_min, na.rm = TRUE),
+    sd_duration_min = sd(duration_min, na.rm = TRUE),
+    total_duration_hours = sum(duration_min, na.rm = TRUE) / 60,
+    .groups = 'drop'
+  ) |>
+  mutate(usage_percentage = total_rides / sum(total_rides) * 100)
+
+print(bike_comparison)
+
+# 4. Visualizations
+# ===========================================================
+
+# 4.1 Total Rides Comparison
+ggplot(bike_comparison, aes(x = rideable_type, y = total_rides, fill = rideable_type)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = scales::comma(total_rides)), vjust = -0.5, size = 5) +
+  labs(
+    title = "Total Rides by Bike Type",
+    subtitle = "March 2024 Citi Bike Data",
+    x = "Bike Type",
+    y = "Total Number of Rides",
+    fill = "Bike Type"
+  ) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    plot.subtitle = element_text(hjust = 0.5, size = 12),
+    legend.position = "none"
+  )
+
+# 4.2 Average Duration Comparison
+ggplot(bike_comparison, aes(x = rideable_type, y = mean_duration_min, fill = rideable_type)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = round(mean_duration_min, 1)), vjust = -0.5, size = 5) +
+  labs(
+    title = "Average Ride Duration by Bike Type",
+    subtitle = "March 2024 Citi Bike Data",
+    x = "Bike Type",
+    y = "Average Duration (minutes)",
+    fill = "Bike Type"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    plot.subtitle = element_text(hjust = 0.5, size = 12),
+    legend.position = "none"
+  )
+
+# 4.3 Side-by-side Comparison
+comparison_long <- bike_comparison %>%
+  select(rideable_type, total_rides, mean_duration_min) %>%
+  pivot_longer(cols = c(total_rides, mean_duration_min), 
+               names_to = "metric", 
+               values_to = "value")
+
+ggplot(comparison_long, aes(x = rideable_type, y = value, fill = rideable_type)) +
+  geom_col() +
+  facet_wrap(~metric, scales = "free_y", 
+             labeller = labeller(metric = c(
+               total_rides = "Total Rides",
+               mean_duration_min = "Average Duration (min)"
+             ))) +
+  labs(
+    title = "Bike Type Comparison: Usage and Duration",
+    subtitle = "March 2024 Citi Bike Data",
+    x = "Bike Type",
+    y = "Value",
+    fill = "Bike Type"
+  ) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    plot.subtitle = element_text(hjust = 0.5, size = 12),
+    strip.text = element_text(face = "bold", size = 12)
+  )
+
+# 4.4 Duration Distribution Comparison (up to 60 minutes)
+ggplot(data_clean %>% filter(duration_min <= 60), 
+       aes(x = duration_min, fill = rideable_type)) +
+  geom_histogram(alpha = 0.6, position = "identity", bins = 60) +
+  labs(
+    title = "Ride Duration Distribution Comparison",
+    subtitle = "Rides up to 60 minutes",
+    x = "Duration (minutes)",
+    y = "Frequency",
+    fill = "Bike Type"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    plot.subtitle = element_text(hjust = 0.5, size = 12)
+  )
+
+# 5. Statistical Test
+# ===========================================================
+cat("\n===== Statistical Test: Duration Difference =====\n")
+
+# t-test comparing average duration between electric and classic bikes
+electric_duration =
+  data_clean |>
+  filter(rideable_type == "electric_bike") |>
+  pull(duration_min)
+
+classic_duration <- data_clean |>
+  filter(rideable_type == "classic_bike") |>
+  pull(duration_min)
+
+if(length(electric_duration) > 0 & length(classic_duration) > 0) {
+  t_test_result <- t.test(electric_duration, classic_duration)
+  print(t_test_result)
+}
+
+# 6. Export Results
+# ===========================================================
+write_csv(bike_comparison, "bike_type_comparison_summary.csv")
+
+cat("\n===== Analysis Complete! =====\n")
+cat("Results saved to: bike_type_comparison_summary.csv\n")
+
+
+
+
+
+```
+
