@@ -1,5 +1,5 @@
 ---
-title: '1'
+title: 'bike_type'
 output: github_document
 date: "2025-11-12"
 ---
@@ -7,166 +7,226 @@ date: "2025-11-12"
 ```{r}
 library(tidyverse)
 library(lubridate)
+```
 
-# 1. 导入数据
-# =================================================
-data <- read_csv("202403-citibike-tripdata_2.csv")
+# Import data
+```{r}
+data <- read_csv("citibike_sample_12k.csv")
+```
 
-# View data structure
-glimpse(data)
 
-# 2. Data Preprocessing
-# ===========================================================
+# Data Preprocessing
+```{r}
 # Calculate ride duration in minutes
 data =
   data |>
   mutate(
     started_at = ymd_hms(started_at),
     ended_at = ymd_hms(ended_at),
-    duration_min = as.numeric(difftime(ended_at, started_at, units = "mins"))
-  )
+    duration_min = as.numeric(difftime(ended_at, started_at, units = "mins")),
+    month = floor_date(started_at, "month"),
+    month_label = format(started_at, "%Y-%m")
+  ) |>
+   filter(year(started_at) == 2024)
 
-# Filter out anomalies (duration between 0 and 1440 minutes)
+# Filter out anomalies (duration between 0 and 200 minutes)
 data_clean =
   data |>
-  filter(duration_min > 0 & duration_min < 1440)
+  filter(duration_min > 0 & duration_min < 200)
+```
 
-# 3. Bike Type Comparison: Usage and Duration
-# ===========================================================
 
-cat("\n===== Bike Type Comparison Summary =====\n")
+# Bike Type Comparison: Usage and Duration
 
-# Overall comparison statistics
-bike_comparison =
+## Monthly statistics
+```{r}
+monthly_stats =
   data_clean |>
-  group_by(rideable_type) |>
-  summarise(
-    total_rides = n(),
-    mean_duration_min = mean(duration_min, na.rm = TRUE),
-    median_duration_min = median(duration_min, na.rm = TRUE),
-    sd_duration_min = sd(duration_min, na.rm = TRUE),
-    total_duration_hours = sum(duration_min, na.rm = TRUE) / 60,
-    .groups = 'drop'
+  group_by(month_label, rideable_type) |>
+  summarize(
+    ride_count = n(),                              
+    total_duration = sum(duration_min),            
+    avg_duration = mean(duration_min),             
+    total_duration_hours = total_duration / 60,
+    .groups = "drop"
   ) |>
-  mutate(usage_percentage = total_rides / sum(total_rides) * 100)
+  arrange(month_label)
 
-print(bike_comparison)
+monthly_stats
+```
 
-# 4. Visualizations
-# ===========================================================
-
-# 4.1 Total Rides Comparison
-ggplot(bike_comparison, aes(x = rideable_type, y = total_rides, fill = rideable_type)) +
-  geom_col(width = 0.6) +
-  geom_text(aes(label = scales::comma(total_rides)), vjust = -0.5, size = 5) +
+## Total Rides Comparison
+```{r}
+total_ride =
+  monthly_stats |>
+  ggplot(
+    aes(x = month_label, y = ride_count, 
+        fill = rideable_type)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = ride_count),
+            vjust = -0.5, 
+            size = 3.5) +
   labs(
-    title = "Total Rides by Bike Type",
-    subtitle = "March 2024 Citi Bike Data",
-    x = "Bike Type",
+    title = "Monthly Ride Count Comparison by Bike Type",
+    x = "Month",
     y = "Total Number of Rides",
     fill = "Bike Type"
   ) +
-  scale_y_continuous(labels = scales::comma) +
   theme_minimal() +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-    plot.subtitle = element_text(hjust = 0.5, size = 12),
-    legend.position = "none"
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "top"
   )
 
-# 4.2 Average Duration Comparison
-ggplot(bike_comparison, aes(x = rideable_type, y = mean_duration_min, fill = rideable_type)) +
-  geom_col(width = 0.6) +
-  geom_text(aes(label = round(mean_duration_min, 1)), vjust = -0.5, size = 5) +
-  labs(
-    title = "Average Ride Duration by Bike Type",
-    subtitle = "March 2024 Citi Bike Data",
-    x = "Bike Type",
-    y = "Average Duration (minutes)",
-    fill = "Bike Type"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-    plot.subtitle = element_text(hjust = 0.5, size = 12),
-    legend.position = "none"
-  )
-
-# 4.3 Side-by-side Comparison
-comparison_long <- bike_comparison %>%
-  select(rideable_type, total_rides, mean_duration_min) %>%
-  pivot_longer(cols = c(total_rides, mean_duration_min), 
-               names_to = "metric", 
-               values_to = "value")
-
-ggplot(comparison_long, aes(x = rideable_type, y = value, fill = rideable_type)) +
-  geom_col() +
-  facet_wrap(~metric, scales = "free_y", 
-             labeller = labeller(metric = c(
-               total_rides = "Total Rides",
-               mean_duration_min = "Average Duration (min)"
-             ))) +
-  labs(
-    title = "Bike Type Comparison: Usage and Duration",
-    subtitle = "March 2024 Citi Bike Data",
-    x = "Bike Type",
-    y = "Value",
-    fill = "Bike Type"
-  ) +
-  scale_y_continuous(labels = scales::comma) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-    plot.subtitle = element_text(hjust = 0.5, size = 12),
-    strip.text = element_text(face = "bold", size = 12)
-  )
-
-# 4.4 Duration Distribution Comparison (up to 60 minutes)
-ggplot(data_clean %>% filter(duration_min <= 60), 
-       aes(x = duration_min, fill = rideable_type)) +
-  geom_histogram(alpha = 0.6, position = "identity", bins = 60) +
-  labs(
-    title = "Ride Duration Distribution Comparison",
-    subtitle = "Rides up to 60 minutes",
-    x = "Duration (minutes)",
-    y = "Frequency",
-    fill = "Bike Type"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-    plot.subtitle = element_text(hjust = 0.5, size = 12)
-  )
-
-# 5. Statistical Test
-# ===========================================================
-cat("\n===== Statistical Test: Duration Difference =====\n")
-
-# t-test comparing average duration between electric and classic bikes
-electric_duration =
-  data_clean |>
-  filter(rideable_type == "electric_bike") |>
-  pull(duration_min)
-
-classic_duration <- data_clean |>
-  filter(rideable_type == "classic_bike") |>
-  pull(duration_min)
-
-if(length(electric_duration) > 0 & length(classic_duration) > 0) {
-  t_test_result <- t.test(electric_duration, classic_duration)
-  print(t_test_result)
-}
-
-# 6. Export Results
-# ===========================================================
-write_csv(bike_comparison, "bike_type_comparison_summary.csv")
-
-cat("\n===== Analysis Complete! =====\n")
-cat("Results saved to: bike_type_comparison_summary.csv\n")
-
-
-
-
-
+total_ride
 ```
 
+## Average Duration Comparison
+```{r}
+avg_duration = 
+  monthly_stats |>
+  ggplot(
+    aes(x = month_label, y = avg_duration,
+        color = rideable_type, group = rideable_type)) +
+    geom_line(linewidth = 1.2) +
+    geom_point(size = 3) +
+    geom_text(aes(label = round(avg_duration, 1)), 
+              vjust = -1, 
+              size = 5,
+              show.legend = FALSE) +
+    labs(
+      title = "Average Ride Duration Comparsion by Bike Type",
+      x = "Month",
+      y = "Average Duration (minutes)",
+      color = "Bike Type"
+    ) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      legend.position = "top"
+    )
+
+avg_duration
+```
+
+## Market Share Trend Comparison
+```{r}
+mkt_share =
+  data_clean |>
+  group_by(month_label, rideable_type) |>
+  summarize(ride_count = n(), .groups = "drop") |>
+  group_by(month_label) |>
+  mutate(
+    total = sum(ride_count),
+    percentage = (ride_count / total) * 100
+  ) |>
+  ggplot(aes(x = month_label, y = percentage, 
+             fill = rideable_type)) +
+  geom_col(position = "stack") +
+  geom_text(aes(label = paste0(round(percentage, 1), "%")), 
+            position = position_stack(vjust = 0.5),
+            size = 3,
+            color = "white",
+            fontface = "bold") +
+  labs(
+    title = "Market Share Trend by Bike Type",
+    x = "Month",
+    y = "Percentage (%)",
+    color = "Bike Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "top"
+  ) +
+  ylim(0, 100)
+
+mkt_share
+```
+
+
+## User Type Preference
+```{r}
+user_bike_pref =
+  data_clean |>
+  group_by(member_casual, rideable_type) |>
+  summarize(ride_count = n(), .groups = "drop") |>
+  group_by(member_casual) |>
+  mutate(
+    percentage = (ride_count / sum(ride_count)) * 100
+    ) |>
+  ggplot(
+    aes(x = member_casual, y = percentage, fill = rideable_type)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(percentage, 1), "%")), 
+            position = position_dodge(width = 0.9), 
+            vjust = -0.5,
+            size = 4) +
+  labs(
+    title = "Bike Type Preference by User Type",
+    x = "User Type",
+    y = "Percentage (%)",
+    fill = "Bike Type"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "top"
+  ) +
+  ylim(0, 100)
+
+user_bike_pref
+```
+
+## Ride Duration Distribution
+```{r}
+ride_dur = 
+  data_clean |>
+  ggplot(aes(x = duration_min, fill = rideable_type)) +
+  geom_density(alpha = 0.5, linewidth = 1) +
+  labs(
+    title = "Ride Duration Density Distribution by Bike Type",
+    x = "Duration (minutes)",
+    y = "Density",
+    fill = "Bike Type"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.position = "top"
+  ) +
+  xlim(0, 50)
+
+ride_dur
+```
+
+
+## Hourly Usage Pattern
+```{r}
+hourly_usage =
+  data_clean |>
+  mutate(hour = hour(started_at)) |>
+  group_by(hour, rideable_type) |>
+  summarize(ride_count = n(), .groups = "drop") |>
+  mutate(time_label = sprintf("%02d:00", hour)) |>
+  ggplot(aes(x = time_label, y = ride_count, 
+            color = rideable_type, group = rideable_type)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  labs(
+    title = "Hourly Usage Pattern by Bike Type",
+    x = "Hour of Day",
+    y = "Number of Rides",
+    color = "Bike Type"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "top"
+  ) 
+
+hourly_usage
+```
