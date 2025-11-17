@@ -1,0 +1,105 @@
+---
+title: "12-html-station"
+author: "Chenchen Ma"
+date: "2025-11-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# --- Packages ---
+library(readr)
+library(dplyr)
+library(lubridate)
+library(leaflet)
+library(scales)
+library(glue)
+library(htmlwidgets)
+
+# --- 0) Paths ---
+in_csv   <- "data/citibike_sample_12k.csv"
+out_dir  <- "results/maps_by_month"
+dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+
+# --- 1) Read your combined data ---
+citibike <- read_csv(in_csv, show_col_types = FALSE)
+
+# --- 1a) Ensure a 'month' column exists (YYYYMM) ---
+if (!"month" %in% names(citibike)) {
+  # Try to parse started_at; if parsing fails, month will be NA
+  dt <- suppressWarnings(parse_date_time(
+    citibike$started_at,
+    orders = c("ymd HMS", "ymd HM", "ymd H", "ymd",
+               "Ymd HMS", "Ymd HM", "Ymd H", "Ymd")
+  ))
+  citibike$month <- format(dt, "%Y%m")
+}
+
+# Drop rows with unknown month (if any)
+citibike <- citibike %>% filter(!is.na(month))
+
+# --- 2) Function to build one monthly map from your original logic ---
+make_month_map <- function(df, month_label) {
+
+  # Prepare start & end station data (keep your original column names)
+  starts <- df %>%
+    transmute(
+      station_name = start_station_name,
+      lat = as.numeric(start_lat),
+      lng = as.numeric(start_lng)
+    )
+
+  ends <- df %>%
+    transmute(
+      station_name = end_station_name,
+      lat = as.numeric(end_lat),
+      lng = as.numeric(end_lng)
+    )
+
+  stations <- bind_rows(starts, ends) %>%
+    filter(!is.na(lat), !is.na(lng), station_name != "")
+
+  # Count frequency of each station
+  station_freq <- stations %>%
+    count(station_name, lat, lng, name = "freq", sort = TRUE)
+
+  # --- Color: pink -> blue palette (darker = higher freq) ---
+  pink_blue <- colorRampPalette(c("#FF1493", "#8A2BE2", "#00008B"))
+  pal <- colorNumeric(palette = pink_blue(100), domain = station_freq$freq)
+
+  # Circle radius scaled by frequency
+  radius_scaled <- rescale(station_freq$freq, to = c(5, 15))
+
+  # --- Build leaflet map (same structure as yours) ---
+  m <- leaflet(station_freq) %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    addCircleMarkers(
+      lng = ~lng, lat = ~lat,
+      radius = radius_scaled,
+      color = ~pal(freq),
+      fillColor = ~pal(freq),
+      fillOpacity = 0.9, stroke = FALSE,
+      label = ~paste0(station_name, " — ", freq, " trips")
+    ) %>%
+    addLegend(
+      pal = pal, values = ~freq,
+      title = glue("Station frequency ({month_label})"),
+      opacity = 0.9, position = "bottomright"
+    )
+
+  # Save HTML for this month
+  out_file <- file.path(out_dir, glue("citibike_map_{month_label}.html"))
+  saveWidget(m, file = out_file, selfcontained = TRUE)
+  message("✓ Saved: ", out_file)
+}
+
+# --- 3) Loop over months and create maps ---
+for (mm in sort(unique(citibike$month))) {
+  df_mm <- filter(citibike, month == mm)
+  make_month_map(df_mm, mm)
+}
+
+```
