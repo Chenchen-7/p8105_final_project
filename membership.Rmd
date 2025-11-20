@@ -38,27 +38,101 @@ data_clean =
 ```
 
 
+```{r}
+glimpse(
+  data_clean
+)
+```
+
+## duration
+
+```{r}
+duration_monthly <- data_clean %>%
+  group_by(month_label, member_casual) %>%
+  summarise(
+    avg_duration = mean(duration_min, na.rm = TRUE),
+    median_duration = median(duration_min, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+duration_monthly
+```
+
+
+```{r}
+ggplot(duration_monthly, aes(
+  x = month_label,
+  y = avg_duration,
+  color = member_casual,
+  group = member_casual
+)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Monthly Average Ride Duration: Members vs Casual Riders",
+    x = "Month",
+    y = "Average Duration (minutes)",
+    color = "User Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
 
 
 
+```{r}
+ggplot(duration_monthly, aes(
+  x = month_label,
+  y = avg_duration,
+  fill = member_casual
+)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Average Ride Duration by Month: Members vs Casual Riders",
+    x = "Month",
+    y = "Average Duration (minutes)",
+    fill = "User Type"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## counts
+
+```{r}
+count_monthly <- data_clean %>%
+  group_by(month_label, member_casual) %>%
+  summarise(
+    ride_count = n(),
+    .groups = "drop"
+  )
+
+count_monthly
+```
 
 
+```{r}
+ggplot(count_monthly, aes(
+  x = month_label,
+  y = ride_count,
+  fill = member_casual
+)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Monthly Ride Counts: Members vs Casual Riders",
+    x = "Month",
+    y = "Number of Rides",
+    fill = "User Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
 
 
