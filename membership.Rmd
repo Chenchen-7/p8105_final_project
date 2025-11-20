@@ -1,0 +1,64 @@
+---
+title: "membership"
+author: "Mutian Li"
+date: "2025-11-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+
+```{r}
+data <- read_csv("data/citibike_sample_12k.csv")
+```
+```{r}
+# Calculate ride duration in minutes
+data =
+  data |>
+  mutate(
+    started_at = ymd_hms(started_at),
+    ended_at = ymd_hms(ended_at),
+    duration_min = as.numeric(difftime(ended_at, started_at, units = "mins")),
+    month = floor_date(started_at, "month"),
+    month_label = format(started_at, "%Y-%m")
+  ) |>
+   filter(year(started_at) == 2024)
+
+# Filter out anomalies (duration between 0 and 200 minutes)
+data_clean =
+  data |>
+  filter(duration_min > 0 & duration_min < 200)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
