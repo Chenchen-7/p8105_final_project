@@ -1,0 +1,59 @@
+---
+title: "eda-normal"
+author: "Mutian Li"
+date: "2025-11-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+data_2410 <- read_csv("data/october_2024_sample6k_clean.csv")
+```
+
+```{r}
+mean(data_2410$duration, na.rm = TRUE)
+median(data_2410$duration, na.rm = TRUE)
+```
+
+
+```{r}
+ggplot(data_2410, aes(x = duration)) +
+  geom_histogram(bins = 50, fill = "skyblue", color = "white") +
+  labs(title = "Distribution of Duration")
+
+```
+
+```{r}
+qqnorm(data_2410$duration)
+qqline(data_2410$duration)
+```
+
+
+```{r}
+data_2410_log <- data_2410 %>%
+  mutate(log_duration = log(duration + 1))
+```
+
+
+```{r}
+mean(log(data_2410$duration + 1), na.rm = TRUE)
+median(log(data_2410$duration + 1), na.rm = TRUE)
+```
+
+
+```{r}
+qqnorm(log(data_2410_log$duration+1)); qqline(log(data_2410_log$duration+1))
+```
+
+
+
+
+
