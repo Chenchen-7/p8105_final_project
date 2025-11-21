@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ds1 Final Project</title>
+
+  <!-- Bootstrap CSS -->
+  <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
+    rel="stylesheet">
+    
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+
+  <style>
+    body {
+      padding-top: 70px;
+      font-family: "Gill Sans", Roboto, sans-serif;
+    }
+  /*  .header-section {
+      text-align: center;
+      padding: 60px 20px;
+      background: #f7f9fc;
+      border-bottom: 1px solid #eee;
+    }
+    .header-section h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+    }
+    .header-section p {
+      font-size: 1.2rem;
+      color: #555;
+    }  */
+    
+    .header-section {
+      text-align: center;
+      padding: 100px 20px;
+      background-image: url('assets/header-bg.png'); 
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+      color: white;
+    }
+    
+    .header-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.45); /* 黑色透明遮罩 */
+      z-index: 0;
+    }
+    
+    .header-section h1,
+    .header-section p {
+      position: relative;
+      z-index: 1;   /* 让文字显示在遮罩上面 */
+    }
+
+    
+    /* 侧边栏在滚动时保持可见 */
+    .sidebar-sticky {
+      position: sticky;
+      top: 90px;
+    }
+    /* 点击锚点时，给 section 留出 navbar 的高度 */
+    section {
+      scroll-margin-top: 90px;
+      margin-bottom: 40px;
+    }
+    
+    .navbar {
+      background-color: #B0C4F7 !important;
+    }
+    
+    .navbar-brand,
+    .navbar .nav-link {
+      color: #FFFFFF !important;
+    }
+    
+    .navbar-brand:hover,
+    .navbar .nav-link:hover {
+      color: #000c2e !important;
+    }
+    
+    .list-group-item.active {
+      background-color: #B0C4F7 !important;
+      border-color: #B0C4F7 !important;
+      color: white;
+    }
+    
+    .sidebar-box {
+      margin-left: -40px;
+    }
+    
+    .right-content {
+      margin-left: 30px;
+    }
+    
+    a {
+      color: #6a74d7;
+    }
+    a:hover {
+      color: #4d54a6;
+    }
+
+
+
+  </style>
+</head>
+
+<body>
+
+<!-- 🔵 Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
+
+    <a class="navbar-brand" href="index.html">Home</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+
+        <li class="nav-item">
+          <a class="nav-link" href="resume.html">Report</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/Chenchen-7/p8105_final_project" target="_blank">EDA</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="mailto:ml5308@cumc.columbia.edu">About</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="dashboard.html">dataset</a>
+        </li>
+
+      </ul>
+    </div>
+
+  </div>
+</nav>
+
+<!-- 🟣 Header Section -->
+<div class="header-section">
+  <h1>Welcome</h1>
+  <p>
+    Citi Bike Usage & Ride Duration Modeling <br>
+    This project analyzes New York City Citi Bike usage patterns during 2024 (especially October).
+  </p>
+</div>
+
+<!-- 🟢 Main Content with Sidebar + Sections -->
+<div class="container my-5">
+  <div class="row">
+
+    <!-- 左侧：对应正文 section 的侧边栏 -->
+    <div class="col-md-3 mb-3 sidebar-box">
+      <div class="list-group sidebar-sticky">
+        <a href="#overview" class="list-group-item list-group-item-action active">
+          Overview
+        </a>
+        <a href="#resume-section" class="list-group-item list-group-item-action">
+          Data sourse
+        </a>
+        <a href="#github-section" class="list-group-item list-group-item-action">
+          GitHub
+        </a>
+        <a href="#email-section" class="list-group-item list-group-item-action">
+          Email
+        </a>
+        <a href="#dashboard-section" class="list-group-item list-group-item-action">
+          Problem 2 Dashboard
+        </a>
+      </div>
+    </div>
+
+    <!-- 右侧：正文多个 section -->
+    <div class="col-md-9 right-content">
+
+      <section id="overview">
+        <h3>Overview</h3>
+        <p>
+          This project analyzes New York City Citi Bike usage patterns during 2024 (especially October).
+        </p>
+      </section>
+
+      <section id="resume-section">
+        <h3>Data sourse</h3>
+        <p>
+          This project uses the publicly available Citi Bike system data provided by Lyft through the official Citi Bike website:
+          <a href="https://citibikenyc.com/system-data" target="_blank">Citibike data</a>.
+          Weather information was obtained from the Open-Meteo Weather API:
+          <a href="https://open-meteo.com/en/docs" target="_blank">weather data</a>.
+        </p>
+      </section>
+
+      <section id="github-section">
+        <h3>GitHub</h3>
+        <p>
+          Visit project website here:
+          <a href="https://github.com/Chenchen-7/p8105_final_project" target="_blank">github.com/Chenchen-7/p8105_final_project</a>.
+        </p>
+      </section>
+
+      <section id="email-section">
+        <h3>Email</h3>
+        <p>
+          Feel free to reach out to me via email for questions about this assignment,
+          collaboration opportunities, or anything related to biostatistics and data science.
+          <br>
+          <a href="mailto:ml5308@cumc.columbia.edu">ml5308@cumc.columbia.edu</a>
+        </p>
+      </section>
+
+      <section id="dashboard-section">
+        <h3>Problem 2 Dashboard</h3>
+        <p>
+          The interactive visualization and analysis for Problem 2 are available on the
+          <a href="dashboard.html">Problem 2 Dashboard</a>. This dashboard summarizes key findings
+          using plots and tables created in R.
+        </p>
+      </section>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script 
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+</script>
+
+</body>
+</html>
