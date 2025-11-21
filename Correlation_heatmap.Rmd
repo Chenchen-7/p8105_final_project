@@ -1,0 +1,90 @@
+---
+title: "Correlation_heatmap"
+output: github_document
+date: "2025-11-21"
+---
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+```
+
+```{r}
+merged_data = read_csv("./data/merged_data_clean.csv")
+names(merged_data)
+```
+
+```{r}
+selected_vars = 
+  merged_data |>
+  select(rideable_type, member_casual, temp_c, weather_code, wind_speed, precip_mm)
+
+# Recode factors
+data_encoded = 
+  selected_vars |>
+  mutate(
+    rideable_type_num = as.numeric(factor(rideable_type)),
+    member_casual_num = as.numeric(factor(member_casual)),
+    weather_code_num = as.numeric(factor(weather_code))
+  ) |>
+  select(rideable_type_num, member_casual_num, temp_c, 
+         weather_code_num, wind_speed, precip_mm)
+
+cor_matrix = cor(data_encoded, use = "complete.obs")
+
+# Rename column
+colnames(cor_matrix) = c("rideable_type", "member_casual", "temp_c", 
+                          "weather_code", "wind_speed", "precip_mm")
+rownames(cor_matrix) = c("rideable_type", "member_casual", "temp_c", 
+                          "weather_code", "wind_speed", "precip_mm")
+
+cor_melted = melt(cor_matrix)
+
+# Draw plots for all variables
+htmap_all = 
+  cor_melted |>
+  ggplot(aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = round(value, 2)), color = "black", size = 4) +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1, 1),
+                       name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+        axis.title = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold")) +
+  labs(title = "Correlation Heatmap of All Variables") +
+  coord_fixed()
+
+htmap_all
+```
+
+
+```{r}
+# Draw plot for continuous variables
+continuous_vars =
+  selected_vars |>
+  select(temp_c, wind_speed, precip_mm)
+
+cor_continuous = cor(continuous_vars, use = "complete.obs")
+cor_continuous_melted = melt(cor_continuous)
+
+htmap_con = 
+  cor_continuous_melted |>
+  ggplot( aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = round(value, 2)), color = "black", size = 5) +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1, 1),
+                       name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold")) +
+  labs(title = "Correlation Heatmap of Continuous Variables") +
+  coord_fixed()
+
+htmap_con
+```
