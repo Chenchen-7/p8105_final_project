@@ -88,3 +88,65 @@ htmap_con =
 
 htmap_con
 ```
+
+```{r}
+data_with_y = 
+  merged_data |>
+  select(rideable_type, member_casual, temp_c, weather_code, 
+         wind_speed, precip_mm, duration) |>
+  mutate(
+    rideable_type_num = as.numeric(factor(rideable_type)),
+    member_casual_num = as.numeric(factor(member_casual)),
+    weather_code_num = as.numeric(factor(weather_code))
+  )
+
+# Calculate correlation between x and y
+x_vars = data_with_y |>
+  select(rideable_type_num, member_casual_num, temp_c, 
+         weather_code_num, wind_speed, precip_mm)
+
+y_var = data_with_y$duration
+
+
+cor_with_y = cor(x_vars, y_var, use = "complete.obs")
+
+cor_df = data.frame(
+  variable = c("rideable_type", "member_casual", "temp_c", 
+               "weather_code", "wind_speed", "precip_mm"),
+  correlation = as.vector(cor_with_y)
+) |>
+  arrange(desc(abs(correlation)))
+
+cor_df
+
+# Draw plot
+cor_plot = 
+  cor_df |>
+  ggplot(aes(x = reorder(variable, correlation), y = correlation, 
+             fill = correlation)) +
+  geom_col(color = "black") +
+  geom_text(aes(label = round(correlation, 3)), 
+            hjust = ifelse(cor_df$correlation > 0, -0.2, 1.2),
+            size = 4) +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1, 1),
+                       name = "Correlation") +
+  coord_flip() +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    axis.title.x = element_text(face = "bold"),
+    legend.position = "right"
+  ) +
+  labs(
+    title = "Correlation between Variables and Ride Duration",
+    x = "Variables",
+    y = "Correlation Coefficient"
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50")
+
+cor_plot
+```
+
+
+

@@ -5,7 +5,7 @@ date: "2025-11-12"
 ---
 
 ```{r}
-data01 <- read.csv("~/Desktop/STA-HW/p8105_final_project/Data/202401-citibike-tripdata/202401-citibike-tripdata_1.csv")
+data01 <- read_csv("~/Desktop/STA-HW/p8105_final_project/Data/202401-citibike-tripdata/202401-citibike-tripdata_1.csv")
 ```
 
 ```{r}
@@ -86,8 +86,8 @@ library(glue)
 library(htmlwidgets)
 
 
-in_csv   <- "/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/citibike_sample_12k.csv"
-out_dir  <- "/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/maps_by_month"
+in_csv   <- "./Data/citibike_sample_12k.csv"
+out_dir  <- "./Data/maps_by_month"
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
 citibike <- read_csv(in_csv, show_col_types = FALSE)
@@ -174,7 +174,7 @@ library(dplyr)
 library(lubridate)
 
 citibike <- read_csv(
-  "/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/citibike_sample_12k.csv",
+  "./Data/citibike_sample_12k.csv",
   show_col_types = FALSE
 )
 
@@ -287,7 +287,7 @@ library(dplyr)
 library(lubridate)
 library(readr)
 
-october_data <- read_csv("/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/october_2024_sample6k_clean.csv")
+october_data <- read_csv("./Data/october_2024_sample6k_clean.csv")
 
 october_data <- october_data %>%
   mutate(
@@ -313,10 +313,10 @@ library(dplyr)
 library(lubridate)
 
 weather <- read_csv(
-  "/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/weather.csv",
+  "/Data/weather.csv",
   skip = 3,             
   show_col_types = FALSE,
-  col_types = cols(   
+  col_types = cols(   z
     time = col_character(),
     .default = col_double()
   )
