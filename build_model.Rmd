@@ -1,0 +1,570 @@
+---
+title: "model"
+output: html_document
+date: "2025-11-12"
+---
+
+```{r}
+data01 <- read.csv("~/Desktop/STA-HW/p8105_final_project/Data/202401-citibike-tripdata/202401-citibike-tripdata_1.csv")
+```
+
+```{r}
+library(readr)
+library(dplyr)
+library(purrr)
+```
+
+```{r}
+# build file paths for Jan–Dec 2024
+months <- sprintf("%02d", 1:12)
+
+file_paths <- file.path(
+  "~/Desktop/STA-HW/p8105_final_project/Data",
+  paste0("2024", months, "-citibike-tripdata"),
+  paste0("2024", months, "-citibike-tripdata_1.csv")
+)
+
+file_paths
+```
+
+```{r}
+library(readr)
+library(dplyr)
+library(purrr)
+
+set.seed(42)
+
+months <- sprintf("%02d", 1:12)
+file_paths <- file.path(
+  path.expand("~/Desktop/STA-HW/p8105_final_project/Data"),
+  paste0("2024", months, "-citibike-tripdata"),
+  paste0("2024", months, "-citibike-tripdata_1.csv")
+)
+
+sample_1k_readr <- function(path) {
+  # Read all columns as character to avoid parsing issues
+  df <- read_csv(
+    path,
+    col_types = cols(.default = col_character()),
+    show_col_types = FALSE,
+    guess_max = 100000
+  )
+
+
+  n_take <- min(1000L, nrow(df)) 
+  if (n_take == 0L) return(df[0, ]) 
+  dplyr::slice_sample(df, n = n_take)
+}
+
+citibike_sample_12k <- map_dfr(file_paths, sample_1k_readr)
+
+```
+
+```{r}
+citibike_sample_12k
+```
+
+```{r}
+library(readr)
+
+
+out_path <- "~/Desktop/STA-HW/p8105_final_project/Data/citibike_sample_12k.csv"
+
+write_csv(citibike_sample_12k, out_path)
+
+```
+
+# Code for Map
+```{r}
+# --- Packages ---
+library(readr)
+library(dplyr)
+library(lubridate)
+library(leaflet)
+library(scales)
+library(glue)
+library(htmlwidgets)
+
+
+in_csv   <- "/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/citibike_sample_12k.csv"
+out_dir  <- "/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/maps_by_month"
+dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+
+citibike <- read_csv(in_csv, show_col_types = FALSE)
+
+# Ensure a 'month' column exists (YYYYMM) ---
+if (!"month" %in% names(citibike)) {
+  # Try to parse started_at
+  dt <- suppressWarnings(parse_date_time(
+    citibike$started_at,
+    orders = c("ymd HMS", "ymd HM", "ymd H", "ymd",
+               "Ymd HMS", "Ymd HM", "Ymd H", "Ymd")
+  ))
+  citibike$month <- format(dt, "%Y%m")
+}
+
+# Drop rows with unknown month (if any)
+citibike <- citibike %>% filter(!is.na(month))
+
+# Function to build one monthly map from your original logic ---
+make_month_map <- function(df, month_label) {
+
+  starts <- df %>%
+    transmute(
+      station_name = start_station_name,
+      lat = as.numeric(start_lat),
+      lng = as.numeric(start_lng)
+    )
+
+  ends <- df %>%
+    transmute(
+      station_name = end_station_name,
+      lat = as.numeric(end_lat),
+      lng = as.numeric(end_lng)
+    )
+
+  stations <- bind_rows(starts, ends) %>%
+    filter(!is.na(lat), !is.na(lng), station_name != "")
+
+  # Count frequency of each station
+  station_freq <- stations %>%
+    count(station_name, lat, lng, name = "freq", sort = TRUE)
+
+  pink_blue <- colorRampPalette(c("#FF1493", "#8A2BE2", "#00008B"))
+  pal <- colorNumeric(palette = pink_blue(100), domain = station_freq$freq)
+
+  radius_scaled <- rescale(station_freq$freq, to = c(5, 15))
+
+  # Build leaflet map
+  m <- leaflet(station_freq) %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    addCircleMarkers(
+      lng = ~lng, lat = ~lat,
+      radius = radius_scaled,
+      color = ~pal(freq),
+      fillColor = ~pal(freq),
+      fillOpacity = 0.9, stroke = FALSE,
+      label = ~paste0(station_name, " — ", freq, " trips")
+    ) %>%
+    addLegend(
+      pal = pal, values = ~freq,
+      title = glue("Station frequency ({month_label})"),
+      opacity = 0.9, position = "bottomright"
+    )
+
+  # Save HTML for this month
+  out_file <- file.path(out_dir, glue("citibike_map_{month_label}.html"))
+  saveWidget(m, file = out_file, selfcontained = TRUE)
+  message("✓ Saved: ", out_file)
+}
+
+# create  maps
+for (mm in sort(unique(citibike$month))) {
+  df_mm <- filter(citibike, month == mm)
+  make_month_map(df_mm, mm)
+}
+
+```
+
+
+```{r}
+# --- Packages ---
+library(readr)
+library(dplyr)
+library(lubridate)
+
+citibike <- read_csv(
+  "/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/citibike_sample_12k.csv",
+  show_col_types = FALSE
+)
+
+citibike_clean <- citibike %>%
+  filter(if_all(everything(), ~ !is.na(.)))
+
+
+# Adjust format if your timestamps differ (ymd HMS, ymd HM, etc.)
+citibike_clean <- citibike_clean %>%
+  mutate(
+    started_at = parse_date_time(started_at,
+                                 orders = c("ymd HMS", "ymd HM", "ymd H", 
+                                            "Ymd HMS", "Ymd HM", "Ymd H")),
+    ended_at   = parse_date_time(ended_at,
+                                 orders = c("ymd HMS", "ymd HM", "ymd H", 
+                                            "Ymd HMS", "Ymd HM", "Ymd H"))
+  )
+
+
+citibike_clean <- citibike_clean %>%
+  mutate(duration = as.numeric(difftime(ended_at, started_at, units = "mins")))
+
+# Remove outliers
+# Keep only durations between 0 and 200 minutes
+citibike_filtered <- citibike_clean %>%
+  filter(duration > 0, duration < 200)
+
+
+head(citibike_filtered)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+library(purrr)
+library(lubridate)
+library(ggplot2)
+
+set.seed(42)
+
+# Build paths for the 6 October CSVs 
+oct_dir <- "/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/202410-citibike-tripdata"
+oct_paths <- file.path(
+  oct_dir,
+  paste0("202410-citibike-tripdata_", 1:6, ".csv")
+)
+
+# read one file safely and sample 1000 rows
+sample_1k <- function(path) {
+  # read as character to avoid type conflicts across files
+  df <- read_csv(
+    path,
+    col_types = cols(.default = col_character()),
+    show_col_types = FALSE,
+    progress = FALSE
+  )
+  n_take <- min(1000L, nrow(df))
+  if (n_take == 0L) return(df[0, ])
+  dplyr::slice_sample(df, n = n_take)
+}
+
+# sample 1000 from each of 6 files and combine
+oct_sample6k <- map_dfr(oct_paths, sample_1k)
+
+# remove rows with ANY NA
+oct_clean <- oct_sample6k %>%
+  filter(if_all(everything(), ~ !is.na(.)))
+
+#  parse datetimes and compute duration
+oct_clean <- oct_clean %>%
+  mutate(
+    started_at = parse_date_time(
+      started_at,
+      orders = c("ymd HMS","ymd HM","ymd H","ymd",
+                 "Ymd HMS","Ymd HM","Ymd H","Ymd")
+    ),
+    ended_at   = parse_date_time(
+      ended_at,
+      orders = c("ymd HMS","ymd HM","ymd H","ymd",
+                 "Ymd HMS","Ymd HM","Ymd H","Ymd")
+    ),
+    duration = as.numeric(difftime(ended_at, started_at, units = "mins"))
+  )
+
+
+# filter
+oct_filtered <- oct_clean %>%
+  filter(!is.na(duration), duration > 0, duration < 200)
+
+# checking
+summary(oct_filtered$duration)
+nrow(oct_filtered)
+
+# Save csv
+write_csv(
+  oct_filtered,
+  "/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/october_2024_sample6k_clean.csv"
+)
+
+
+```
+
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(readr)
+
+library(dplyr)
+library(lubridate)
+library(readr)
+
+october_data <- read_csv("/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/october_2024_sample6k_clean.csv")
+
+october_data <- october_data %>%
+  mutate(
+    # parse as UTC; keep them in UTC
+    started_at = ymd_hms(started_at, tz = "UTC"),
+    ended_at   = ymd_hms(ended_at,   tz = "UTC"),
+    time = floor_date(started_at, "hour"),
+
+    duration = as.numeric(difftime(ended_at, started_at, units = "secs"))
+  )
+
+october_data
+```
+
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(stringr)
+
+library(readr)
+library(dplyr)
+library(lubridate)
+
+weather <- read_csv(
+  "/Users/machenchen/Desktop/STA-HW/p8105_final_project/Data/weather.csv",
+  skip = 3,             
+  show_col_types = FALSE,
+  col_types = cols(   
+    time = col_character(),
+    .default = col_double()
+  )
+) %>%
+  filter(!is.na(time)) %>%
+  rename(
+    temp_c       = `temperature_2m (C)`,
+    weather_code = `weather_code (wmo code)`,
+    wind_speed   = `wind_speed_100m (km/h)`,
+    precip_mm    = `precipitation (mm)`
+  ) %>%
+  mutate(
+    # parse as UTC
+    time = ymd_hm(time, tz = "UTC")
+  )
+
+weather
+```
+
+
+```{r}
+merged <- october_data %>%
+  left_join(weather, by = "time")
+merged
+```
+
+```{r}
+merged <- merged |>
+  select(-last_col())
+merged
+```
+
+```{r}
+summary(merged)
+```
+
+
+```{r}
+any(is.na(merged))
+colSums(is.na(october_data))
+```
+
+# Fitting model
+
+```{r}
+library(gbm)            # for gradient boosting
+library(tidyverse)      # for data handling
+merged <- merged |>
+  mutate(
+    member_casual = as.factor(member_casual),
+    rideable_type = as.factor(rideable_type),
+    weather_code  = as.factor(weather_code)
+  )
+merged
+```
+
+```{r}
+str(merged$weather_code)
+```
+
+
+
+```{r}
+# Model A: Multiple Linear Regression (baseline model)
+model_lm <- lm(duration ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = merged)
+summary (model_lm)
+```
+
+```{r}
+# Reduced model
+model_lm_0 <- lm(duration ~ temp_c + member_casual,
+               data = merged)
+summary(model_lm_0)
+```
+
+
+```{r}
+levels(merged$member_casual)
+levels(merged$rideable_type)
+```
+
+casual = 0, member = 1. classoc_bike = 0, electric_bike = 1.
+
+
+```{r}
+# Model B: Random Forest Regression (nonlinear)
+library(randomForest)
+model_rf <- randomForest::randomForest(
+  duration ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data = merged
+)
+```
+
+```{r}
+# Reduced model for Model B
+model_rf_0 <- randomForest::randomForest(
+  duration ~ temp_c + member_casual, data = merged
+)
+```
+
+
+
+```{r}
+# Model C: Gradient Boosting (XGBoost or gbm)
+model_gbm <- gbm::gbm(
+  duration ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data = merged,
+  distribution = "gaussian",
+  n.trees = 3000, 
+  interaction.depth = 4,
+  shrinkage = 0.01,
+  cv.folds = 5
+)
+
+```
+
+```{r}
+# Reduced model for Model C
+model_gbm_0 <- gbm::gbm(
+  duration ~ temp_c + member_casual, data = merged,
+  distribution = "gaussian",
+  n.trees = 3000, 
+  interaction.depth = 4,
+  shrinkage = 0.01,
+  cv.folds = 5
+)
+```
+
+
+```{r}
+# Checking MSE
+set.seed(1)
+train_index <- sample(nrow(merged), 0.8 * nrow(merged))
+train <- merged[train_index, ]
+test  <- merged[-train_index, ]
+
+model_lm_0 <- lm(duration ~ temp_c + member_casual, data  = train)
+model_rf_0 <- randomForest::randomForest(
+  duration ~ temp_c + member_casual, data = train
+)
+model_gbm_0 <- gbm::gbm(
+  duration ~ temp_c + member_casual, data = train,
+  distribution = "gaussian",
+  n.trees = 3000, 
+  interaction.depth = 4,
+  shrinkage = 0.01,
+  cv.folds = 5
+)
+
+rmse <- function(actual, predicted) {
+  sqrt(mean((actual - predicted)^2))
+}
+
+rmse_lm  <- rmse(test$duration, predict(model_lm_0,  test))
+rmse_rf  <- rmse(test$duration, predict(model_rf_0,  test))
+rmse_gbm <- rmse(test$duration, predict(model_gbm_0, test, n.trees = 3000))
+
+cbind(
+  Model = c("LM", "Random Forest", "GBM"),
+  RMSE  = c(rmse_lm, rmse_rf, rmse_gbm)
+)
+```
+
+
+```{r}
+# Checking MSE
+set.seed(1)
+train_index <- sample(nrow(merged), 0.8 * nrow(merged))
+train <- merged[train_index, ]
+test  <- merged[-train_index, ]
+
+model_lm_1 <- lm(duration ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = train)
+model_rf_1 <- randomForest::randomForest(
+  duration ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data = train
+)
+model_gbm_1 <- gbm::gbm(
+  duration ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data = train,
+  distribution = "gaussian",
+  n.trees = 3000, 
+  interaction.depth = 4,
+  shrinkage = 0.01,
+  cv.folds = 5
+)
+
+rmse <- function(actual, predicted) {
+  sqrt(mean((actual - predicted)^2))
+}
+
+rmse_lm  <- rmse(test$duration, predict(model_lm_1,  test))
+rmse_rf  <- rmse(test$duration, predict(model_rf_1,  test))
+rmse_gbm <- rmse(test$duration, predict(model_gbm_1, test, n.trees = 3000))
+
+cbind(
+  Model = c("LM", "Random Forest", "GBM"),
+  RMSE  = c(rmse_lm, rmse_rf, rmse_gbm)
+)
+```
+
+
+```{r}
+# Checking MSE
+# duration for log
+set.seed(1)
+train_index <- sample(nrow(merged), 0.8 * nrow(merged))
+train <- merged[train_index, ]
+test  <- merged[-train_index, ]
+
+
+
+model_lm_1 <- lm(log(duration) ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = train)
+model_rf_1 <- randomForest::randomForest(
+  log(duration) ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = train
+)
+model_gbm_1 <- gbm::gbm(
+  log(duration) ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = train,
+  distribution = "gaussian",
+  n.trees = 3000, 
+  interaction.depth = 4,
+  shrinkage = 0.01,
+  cv.folds = 5
+)
+
+
+
+rmse <- function(actual, predicted) {
+  sqrt(mean((actual - predicted)^2))
+}
+
+rmse_lm  <- rmse(test$duration, predict(model_lm_1,  test))
+rmse_rf  <- rmse(test$duration, predict(model_rf_1,  test))
+rmse_gbm <- rmse(test$duration, predict(model_gbm_1, test, n.trees = 3000))
+
+cbind(
+  Model = c("LM", "Random Forest", "GBM"),
+  RMSE  = c(rmse_lm, rmse_rf, rmse_gbm)
+)
+```
+
+
+
+
+
+
+

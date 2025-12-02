@@ -1,0 +1,69 @@
+---
+title: "plot_station_flow"
+author: "Hongda Chen"
+date: "2025-11-20"
+output: html_document
+---
+
+```{r message=FALSE}
+library(dplyr)
+library(plotly)
+library(tidyverse)
+```
+Read the data
+```{r}
+citibike = read.csv("/Users/hongdachen/Desktop/p8105_final_project_new/citibike_sample_12k.csv")
+```
+
+```{r}
+citibike_clean = citibike %>% filter(
+  !is.na(start_station_id),
+  !is.na(end_station_id),
+  !is.na(start_station_name),
+  !is.na(end_station_name),
+  !is.na(start_lat),
+  !is.na(start_lng),
+  !is.na(end_lat),
+  !is.na(end_lng)
+)
+```
+
+```{r}
+start_counts = citibike_clean %>%
+  count(start_station_name, start_station_id, start_lat, start_lng, name = "count")
+
+top10_sc = start_counts %>% slice_max(count, n = 10) %>%
+  mutate(type = "Departures") %>%
+  rename(station = start_station_name, lat = start_lat, lng = start_lng)
+```
+
+```{r}
+end_counts = citibike_clean %>%
+  count(end_station_name, end_station_id, end_lat, end_lng, name = "count")
+
+top10_ec = end_counts %>% slice_max(count, n = 10) %>%
+  mutate(type = "Arrivals") %>%
+  rename(station = end_station_name, lat = end_lat, lng = end_lng)
+```
+
+```{r}
+top10_total = bind_rows(top10_sc, top10_ec)
+```
+Plot
+```{r}
+station_flow = plot_ly() %>%
+  add_trace(data=top10_sc, type="scattermapbox", mode="markers",
+            lat=~lat, lon=~lng,
+            marker=list(size= ~count*10, color = "green", sizemode="area", opacity=0.8), text = ~paste(station, count, sep=": "), name="Departures") %>%
+  add_trace(data=top10_ec, type="scattermapbox", mode="markers",
+            lat=~lat, lon=~lng,
+            marker=list(size= ~count*10, color="blue", sizemode="area", opacity=0.8),
+            text=~paste(station, count, sep=": "), name="Arrivals") %>%
+  layout(title="Top 10 Citibike Stations in NYC",
+         mapbox=list(style="open-street-map",
+                     center=list(lat=40.749156, lon=-73.9916),
+                     zoom=11.5))
+station_flow
+```
+
+
