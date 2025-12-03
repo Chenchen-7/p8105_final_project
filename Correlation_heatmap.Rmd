@@ -61,6 +61,18 @@ htmap_all =
 htmap_all
 ```
 
+```{r}
+# Export plot
+ggsave(
+  filename = "./results/correlation_heatmap_all_variables.png",
+  plot = htmap_all,
+  width = 10,
+  height = 6,
+  dpi = 300
+)
+```
+
+
 
 ```{r}
 # Draw plot for continuous variables
@@ -148,5 +160,14 @@ cor_plot =
 cor_plot
 ```
 
-
+```{r}
+# Export plot
+ggsave(
+  filename = "./results/correlation_y.png",
+  plot = cor_plot,
+  width = 10,
+  height = 6,
+  dpi = 300
+)
+```
 
