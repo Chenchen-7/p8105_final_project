@@ -3,10 +3,14 @@ title: "eda-normal"
 author: "Mutian Li"
 date: "2025-11-20"
 output: html_document
+
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.path = "results/ynormal/"
+)
 ```
 
 ```{r}
@@ -24,14 +28,13 @@ median(data_2410$duration, na.rm = TRUE)
 ```
 
 
-```{r}
+```{r duration_histogram_original}
 ggplot(data_2410, aes(x = duration)) +
   geom_histogram(bins = 50, fill = "skyblue", color = "white") +
   labs(title = "Distribution of Duration")
-
 ```
 
-```{r}
+```{r duration_qq_original}
 qqnorm(data_2410$duration)
 qqline(data_2410$duration)
 ```
@@ -49,8 +52,9 @@ median(log(data_2410$duration + 1), na.rm = TRUE)
 ```
 
 
-```{r}
-qqnorm(log(data_2410_log$duration+1)); qqline(log(data_2410_log$duration+1))
+```{r duration_qq_log}
+qqnorm(log(data_2410_log$duration+1))
+qqline(log(data_2410_log$duration+1))
 ```
 
 

@@ -6,7 +6,10 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.path = "results/membership/"
+)
 ```
 
 ```{r}
@@ -60,7 +63,7 @@ duration_monthly
 ```
 
 
-```{r}
+```{r compare_duration_line}
 ggplot(duration_monthly, aes(
   x = month_label,
   y = avg_duration,
@@ -83,7 +86,7 @@ ggplot(duration_monthly, aes(
 
 
 
-```{r}
+```{r compare_duration_hist}
 ggplot(duration_monthly, aes(
   x = month_label,
   y = avg_duration,
@@ -114,7 +117,7 @@ count_monthly
 ```
 
 
-```{r}
+```{r compare_counts_hist}
 ggplot(count_monthly, aes(
   x = month_label,
   y = ride_count,
