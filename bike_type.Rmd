@@ -84,6 +84,18 @@ total_ride =
 total_ride
 ```
 
+```{r}
+ggsave(
+  filename = "./results/monthly_ride_comparison.png",
+  plot = total_ride,
+  width = 10,
+  height = 6,
+  dpi = 300,
+  bg = "white"
+)
+```
+
+
 ## Average Duration Comparison
 ```{r}
 avg_duration = 
@@ -115,6 +127,18 @@ avg_duration =
 
 avg_duration
 ```
+
+```{r}
+ggsave(
+  filename = "./results/average_duration.png",
+  plot = avg_duration,
+  width = 10,
+  height = 6,
+  dpi = 300,
+  bg = "white"
+)
+```
+
 
 ## Market Share Trend Comparison
 ```{r}
@@ -155,6 +179,16 @@ mkt_share =
 mkt_share
 ```
 
+```{r}
+ggsave(
+  filename = "./results/market_share.png",
+  plot = mkt_share,
+  width = 10,
+  height = 6,
+  dpi = 300,
+  bg = "white"
+)
+```
 
 ## User Type Preference
 ```{r}
@@ -192,6 +226,18 @@ user_bike_pref =
 user_bike_pref
 ```
 
+```{r}
+ggsave(
+  filename = "./results/bike_type_preference.png",
+  plot = user_bike_pref,
+  width = 10,
+  height = 6,
+  dpi = 300,
+  bg = "white"
+)
+```
+
+
 ## Ride Duration Distribution
 ```{r}
 ride_dur = 
@@ -215,6 +261,17 @@ ride_dur =
   xlim(0, 50)
 
 ride_dur
+```
+
+```{r}
+ggsave(
+  filename = "./results/bike_type_preference.png",
+  plot = ride_dur,
+  width = 10,
+  height = 6,
+  dpi = 300,
+  bg = "white"
+)
 ```
 
 
@@ -247,3 +304,15 @@ hourly_usage =
 
 hourly_usage
 ```
+
+```{r}
+ggsave(
+  filename = "./results/hourly_usage_pattern.png",
+  plot = hourly_usage,
+  width = 10,
+  height = 6,
+  dpi = 300,
+  bg = "white"
+)
+```
+
