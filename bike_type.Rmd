@@ -228,7 +228,7 @@ user_bike_pref
 
 ```{r}
 ggsave(
-  filename = "./results/bike_type_preference.png",
+  filename = "./results/bike_preference.png",
   plot = user_bike_pref,
   width = 10,
   height = 6,
