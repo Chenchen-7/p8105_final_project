@@ -1,6 +1,6 @@
 ---
-title: "p8105_final_project"
-output: html_document
+title: "Proposal"
+output: github_document
 date: "2025-11-06"
 ---
 
