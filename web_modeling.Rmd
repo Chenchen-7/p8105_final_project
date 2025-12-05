@@ -39,7 +39,8 @@ merged =
 
 # Model Selection
 Select models from Multiple Linear Regression, Random Forest and Gradient Boosting Machine
-1. Checking both RMSE and MAE for three baseline models:
+
+1. Checking both RMSE and MAE for three baseline models
 `duration ~ temp_c + wind_speed + precip_mm + weather_code + member_casual + rideable_type`
 ```{r eval=FALSE}
 # Checking MSE
@@ -105,15 +106,114 @@ cbind(
   MAE   = c(mae_lm, mae_rf, mae_gbm)
 )
 ```
-
 ![](results/model_results/three_models.png)
 
-2. Checking RMSE and MAE for all three log model:
+2. Checking RMSE and MAE for all three log model
 `log_duration ~ temp_c + wind_speed + precip_mm + weather_code + member_casual + rideable_type`
+```{r eval=FALSE}
+# Checking MSE
+# duration for log
+set.seed(1)
+train_index <- sample(nrow(merged), 0.8 * nrow(merged))
+train <- merged[train_index, ]
+test  <- merged[-train_index, ]
+
+model_lm_log <- lm(log(duration) ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = train)
+model_rf_log <- randomForest::randomForest(
+  log(duration) ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = train
+)
+model_gbm_log <- gbm::gbm(
+  log(duration) ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = train,
+  distribution = "gaussian",
+  n.trees = 3000, 
+  interaction.depth = 4,
+  shrinkage = 0.01,
+  cv.folds = 5
+)
+
+# 1) Get predictions on the log scale
+pred_lm_log  <- predict(model_lm_log,  newdata = test)
+pred_rf_log  <- predict(model_rf_log,  newdata = test)
+pred_gbm_log <- predict(model_gbm_log, newdata = test, n.trees = 3000)
+
+# 2) Back-transform to the original duration scale
+pred_lm  <- exp(pred_lm_log)
+pred_rf  <- exp(pred_rf_log)
+pred_gbm <- exp(pred_gbm_log)
+
+# 3) Compute RMSE in original units (seconds)
+rmse_lm  <- rmse(test$duration, pred_lm)
+rmse_rf  <- rmse(test$duration, pred_rf)
+rmse_gbm <- rmse(test$duration, pred_gbm)
+
+mae <- function(actual, predicted) {
+  mean(abs(actual - predicted))
+}
+
+mae_lm  <- mae(test$duration, pred_lm)
+mae_rf  <- mae(test$duration, pred_rf)
+mae_gbm <- mae(test$duration, pred_gbm)
+
+
+cbind(
+  Model = c("LM", "Random Forest", "GBM"),
+  RMSE  = c(rmse_lm, rmse_rf, rmse_gbm),
+  MAE   = c(mae_lm, mae_rf, mae_gbm)
+)
+```
 ![](results/model_results/log_model.png)
 
-3. Checking RMSE and MAE for all three reduced model: 
+3. Checking RMSE and MAE for all three reduced model 
 `duration ~ temp_c + member_casual`
+```{r eval=FALSE}
+# Checking MSE for reduced model
+set.seed(1)
+train_index <- sample(nrow(merged), 0.8 * nrow(merged))
+train <- merged[train_index, ]
+test  <- merged[-train_index, ]
+
+model_lm_0 <- lm(duration ~ temp_c + member_casual, data  = train)
+model_rf_0 <- randomForest::randomForest(
+  duration ~ temp_c + member_casual, data = train
+)
+model_gbm_0 <- gbm::gbm(
+  duration ~ temp_c + member_casual, data = train,
+  distribution = "gaussian",
+  n.trees = 3000, 
+  interaction.depth = 4,
+  shrinkage = 0.01,
+  cv.folds = 5
+)
+
+rmse <- function(actual, predicted) {
+  sqrt(mean((actual - predicted)^2))
+}
+
+# MAE function
+mae <- function(actual, predicted) {
+  mean(abs(actual - predicted))
+}
+
+# RMSE
+rmse_lm  <- rmse(test$duration, predict(model_lm_0,  test))
+rmse_rf  <- rmse(test$duration, predict(model_rf_0,  test))
+rmse_gbm <- rmse(test$duration, predict(model_gbm_0, test, n.trees = 3000))
+
+# MAE
+mae_lm  <- mae(test$duration, predict(model_lm_0,  test))
+mae_rf  <- mae(test$duration, predict(model_rf_0,  test))
+mae_gbm <- mae(test$duration, predict(model_gbm_0, test, n.trees = 3000))
+
+# Results
+cbind(
+  Model = c("LM", "Random Forest", "GBM"),
+  RMSE  = c(rmse_lm, rmse_rf, rmse_gbm),
+  MAE   = c(mae_lm, mae_rf, mae_gbm)
+)
+```
 ![](results/model_results/reduced_models.png)
 
 In this analysis, we use **Mean Absolute Error (MAE)** rather than **Root Mean Squared Error (RMSE)** as the primary evaluation metric. Trip duration in the Citi Bike data is highly right-skewed, with many extreme long-duration trips. Because RMSE squares the errors, it is disproportionately influenced by these outliers and therefore does not reflect typical prediction accuracy. In contrast, MAE weights all errors equally and is robust to skewed distributions, making it a more appropriate and interpretable metric for evaluating models on this dataset. For these reasons, MAE provides a fairer and more stable basis for model comparison.
@@ -123,7 +223,7 @@ Cross validation for three full model with log(duration)
 
 Using 5-fold cross-validated MAE on the log-transformed duration outcome, we compared linear regression, random forest, and gradient boosting models. All three methods achieved very similar predictive accuracy, with MAE values around 0.63. Linear regression had the lowest cross-validated MAE (0.6263), followed closely by GBM (0.6265), while random forest performed slightly worse (0.6287). Given the nearly identical performance and the greater interpretability of linear regression, we selected the linear regression model for further refinement and diagnostic analysis.
 
-# Multiple Linear Regression with log(duration)
+# Multiple Linear Regression
 We evaluated five candidate linear regression models for predicting the log-transformed trip duration. The models differed in their inclusion of polynomial terms and interaction terms:
 
 Base model: `log(duration) ~ temp_c + wind_speed + precip_mm + weather_code + member_casual + rideable_type + day_typeweekend`
