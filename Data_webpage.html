@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Data</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="Data_webpage.html">Data</a>
+</li>
+<li>
+  <a href="shiny.html">Shiny</a>
+</li>
+<li>
+  <a href="analyses.html">Analyses</a>
+</li>
+<li>
+  <a href="report.html">Report</a>
+</li>
+<li>
+  <a href="team_webpage.html">About Us</a>
+</li>
+<li>
+  <a href="https://github.com/Chenchen-7/p8105_final_project">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Data</h1>
+
+</div>
+
+
+<style>
+body {
+  font-family: "Gill Sans", Roboto, sans-serif;
+  font-size: 18px;
+}
+h1, h2, h3 {
+  font-family: "Gill Sans", Roboto, sans-serif;
+}
+</style>
+<div id="initial-data" class="section level2">
+<h2>Initial Data</h2>
+<p>Our project uses the publicly available Citi Bike system data
+provided by Lyft through the official Citi Bike website: “<a
+href="https://citibikenyc.com/system-data"
+class="uri">https://citibikenyc.com/system-data</a>” The dataset
+includes detailed trip-level records for all rides taken within the
+selected month. Weather information was obtained from the Open-Meteo
+Weather API: “<a href="https://open-meteo.com/en/docs"
+class="uri">https://open-meteo.com/en/docs</a>”. Open-Meteo provides
+free, high-resolution historical and real-time weather data without
+requiring API keys.For this project, hourly historical weather data for
+New York City for the month corresponding to the Citi Bike trips was
+downloaded.</p>
+</div>
+<div id="data-cleaning-and-preparation" class="section level2">
+<h2>Data Cleaning and Preparation</h2>
+<div id="sampling-of-citi-bike-trip-data-12-months"
+class="section level3">
+<h3>Sampling of Citi Bike Trip Data (12 Months)</h3>
+<p>Each month of 2024 contains between 2 and 6 Citi Bike CSV files,
+totaling approximately 50 million trip records across the year. To make
+the dataset computationally manageable for initial exploratory analysis
+and visualization, we randomly sampled 1,000 observations from each
+month. This produced a balanced dataset of 12,000 trips used for
+preliminary visualizations and descriptive analysis.</p>
+<pre class="r"><code>months &lt;- sprintf(&quot;%02d&quot;, 1:12)
+file_paths &lt;- file.path(
+  path.expand(&quot;p8105_final_project/Data&quot;),
+  paste0(&quot;2024&quot;, months, &quot;-citibike-tripdata&quot;),
+  paste0(&quot;2024&quot;, months, &quot;-citibike-tripdata_1.csv&quot;)
+)
+
+sample_1k_readr &lt;- function(path) {
+  df &lt;- read_csv(
+    path,
+    col_types = cols(.default = col_character()),
+    show_col_types = FALSE,
+    guess_max = 100000
+  )
+
+
+  n_take &lt;- min(1000L, nrow(df)) 
+  if (n_take == 0L) return(df[0, ]) 
+  dplyr::slice_sample(df, n = n_take)
+}
+
+citibike_sample_12k &lt;- map_dfr(file_paths, sample_1k_readr)</code></pre>
+</div>
+<div id="october-data-preparation" class="section level3">
+<h3>October Data Preparation</h3>
+<p>October contains 6 separate Citi Bike CSV files. We randomly selected
+1,000 observations from each file (for a total of 6,000 October trips)
+to use for more detailed modeling and weather-matched analyses. During
+preprocessing, timestamps were converted to UTC format for consistency
+and alignment with weather data. Then we carry out the screening and
+elimination of NA.</p>
+<pre class="r"><code># Build paths for the 6 October CSVs 
+oct_dir &lt;- &quot;Data/202410-citibike-tripdata&quot;
+oct_paths &lt;- file.path(
+  oct_dir,
+  paste0(&quot;202410-citibike-tripdata_&quot;, 1:6, &quot;.csv&quot;)
+)
+
+sample_1k &lt;- function(path) {
+  df &lt;- read_csv(
+    path,
+    col_types = cols(.default = col_character()),
+    show_col_types = FALSE,
+    progress = FALSE
+  )
+  n_take &lt;- min(1000L, nrow(df))
+  if (n_take == 0L) return(df[0, ])
+  dplyr::slice_sample(df, n = n_take)
+}
+
+# sample 1000 from each of 6 files and combine
+oct_sample6k &lt;- map_dfr(oct_paths, sample_1k)
+
+# remove rows with ANY NA
+oct_clean &lt;- oct_sample6k %&gt;%
+  filter(if_all(everything(), ~ !is.na(.)))
+
+#  parse datetimes and compute duration
+oct_clean &lt;- oct_clean %&gt;%
+  mutate(
+    started_at = parse_date_time(
+      started_at,
+      orders = c(&quot;ymd HMS&quot;,&quot;ymd HM&quot;,&quot;ymd H&quot;,&quot;ymd&quot;,
+                 &quot;Ymd HMS&quot;,&quot;Ymd HM&quot;,&quot;Ymd H&quot;,&quot;Ymd&quot;)
+    ),
+    ended_at   = parse_date_time(
+      ended_at,
+      orders = c(&quot;ymd HMS&quot;,&quot;ymd HM&quot;,&quot;ymd H&quot;,&quot;ymd&quot;,
+                 &quot;Ymd HMS&quot;,&quot;Ymd HM&quot;,&quot;Ymd H&quot;,&quot;Ymd&quot;)
+    ),
+    duration = as.numeric(difftime(ended_at, started_at, units = &quot;mins&quot;))
+  )
+oct_filtered &lt;- oct_clean %&gt;%
+  filter(!is.na(duration), duration &gt; 0, duration &lt; 300)
+write_csv(
+  oct_filtered,
+  &quot;Data/october_2024_sample6k_clean.csv&quot;
+)</code></pre>
+<p>Because the weather data is recorded hourly, we aligned each trip
+with the correct weather record by truncating the started_at timestamp
+to the previous full hour. For example, a trip starting at 11:59 AM or
+11:05 AM is assigned to the 11:00 AM weather observation.</p>
+<pre class="r"><code>october_data &lt;- read_csv(&quot;Data/october_2024_sample6k_clean.csv&quot;)
+
+october_data &lt;- october_data %&gt;%
+  mutate(
+    # parse as UTC; keep them in UTC
+    started_at = ymd_hms(started_at, tz = &quot;UTC&quot;),
+    ended_at   = ymd_hms(ended_at,   tz = &quot;UTC&quot;),
+    time = floor_date(started_at, &quot;hour&quot;),
+
+    duration = as.numeric(difftime(ended_at, started_at, units = &quot;secs&quot;))
+  )</code></pre>
+</div>
+<div id="weather-data-integration" class="section level3">
+<h3>Weather Data Integration</h3>
+<p>Weather information for October 2024 was downloaded from the
+Open-Meteo Historical Weather API, using UTC timestamps to ensure
+consistency with Citi Bike timestamps. The weather variables (e.g.,
+temperature, precipitation, wind speed) were merged with the October
+trip data based on matching UTC time.</p>
+<pre class="r"><code>weather &lt;- read_csv(
+  &quot;Data/weather.csv&quot;,
+  skip = 3,             
+  show_col_types = FALSE,
+  col_types = cols(   
+    time = col_character(),
+    .default = col_double()
+  )
+) %&gt;%
+  filter(!is.na(time)) %&gt;%
+  rename(
+    temp_c       = `temperature_2m (C)`,
+    weather_code = `weather_code (wmo code)`,
+    wind_speed   = `wind_speed_100m (km/h)`,
+    precip_mm    = `precipitation (mm)`
+  ) %&gt;%
+  mutate(
+    time = ymd_hm(time, tz = &quot;UTC&quot;)
+  )
+
+merged &lt;- october_data %&gt;%
+  left_join(weather, by = &quot;time&quot;)</code></pre>
+</div>
+<div id="computation-of-trip-duration" class="section level3">
+<h3>Computation of Trip Duration</h3>
+<p>A new variable, duration, was created as the difference between
+ended_at and started_at. The duration was converted to seconds for
+interpretability. And we merged data.</p>
+<pre class="r"><code>october_data &lt;- october_data %&gt;%
+  mutate(
+    duration = as.numeric(difftime(ended_at, started_at, units = &quot;secs&quot;))
+  )</code></pre>
+</div>
+<div id="outlier-removal-and-data-filtering" class="section level3">
+<h3>Outlier Removal and Data Filtering</h3>
+<p>Trips with erroneous or unrealistic duration values were excluded.
+Specifically, we removed trips with: duration &lt; 0 minutes (invalid
+end/start times), and duration &gt; 300 minutes (extreme long-duration
+outliers).</p>
+<pre class="r"><code># The code we used to filter before
+oct_clean &lt;- oct_sample6k %&gt;%
+  filter(if_all(everything(), ~ !is.na(.)))
+oct_filtered &lt;- oct_clean %&gt;%
+  filter(!is.na(duration), duration &gt; 0, duration &lt; 300)
+
+# NA checking, there is no NA.
+any(is.na(merged))
+colSums(is.na(october_data))</code></pre>
+</div>
+<div id="new-variable-day_type" class="section level3">
+<h3>New variable : day_type</h3>
+<p>To better analyze which factors duration is related to, we have
+included the discussion on weekday and weekend. Therefore, new variables
+need to be added.</p>
+<pre class="r"><code>merged$day_type &lt;- ifelse(wday(merged$started_at) %in% c(1, 7),
+                          &quot;weekend&quot;, &quot;weekday&quot;)
+merged$day_type &lt;- factor(merged$day_type)</code></pre>
+</div>
+</div>
+<div id="final-dataset-description" class="section level2">
+<h2>Final Dataset Description</h2>
+<p>The variables in our dataset are:</p>
+<ul>
+<li><code>ride_id</code>: A unique identifier for each individual Citi
+Bike user.</li>
+<li><code>rideable_type</code>: Type of bicycle used for the trip
+(<code>classic_bike</code> or <code>electric_bike</code>).</li>
+<li><code>started_at</code>: Timestamp (UTC) when the rider began the
+trip.</li>
+<li><code>ended_at</code>: Timestamp (UTC) when the rider ended the
+trip.</li>
+<li><code>start_station_name</code>: The name of the station where the
+trip began.</li>
+<li><code>start_station_id</code>: The numeric station ID where the trip
+began.</li>
+<li><code>end_station_name</code>: The name of the station where the
+trip ended.</li>
+<li><code>end_station_id</code>: The numeric station ID where the trip
+ended.</li>
+<li><code>start_lat</code>: Latitude of the starting station.</li>
+<li><code>start_lng</code>: Longitude of the starting station.</li>
+<li><code>end_lat</code>: Latitude of the ending station.</li>
+<li><code>end_lng</code>: Longitude of the ending station.</li>
+<li><code>member_casual</code>: Membership type (<code>member</code> =
+annual subscriber, <code>casual</code> = non-subscriber).</li>
+<li><code>duration</code>: Trip duration in seconds of difference
+between <code>started_at</code> and <code>ended_at</code>.</li>
+<li><code>time</code>: The hour that truncating the
+<code>started_at</code> timestamp to the previous full hour.</li>
+<li><code>temp_c</code>: Outdoor air temperature (°C) at the hour of the
+trip.</li>
+<li><code>weather_code</code>: Weather condition category (0 = clear, 3
+= cloudy, 53 = moderate rain, etc.).</li>
+<li><code>wind_speed</code>: Wind speed at the time (km/h).</li>
+<li><code>precip_mm</code>: Precipitation at the time (mm).</li>
+</ul>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

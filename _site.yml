@@ -1,0 +1,21 @@
+name: "p8105_final_project"
+navbar:
+  title: "Home"
+  right:
+    - text: "Data"
+      href: Data_webpage.html
+    - text: "Shiny"
+      href: shiny.html
+    - text: "Analyses"
+      href: analyses.html
+    - text: "Report"
+      href: report.html
+    - text: "About Us"
+      href: team_webpage.html
+    - icon: fa-github fa-lg
+      href: https://github.com/Chenchen-7/p8105_final_project
+
+output:
+  html_document:
+    theme: flatly
+    css: styles.css

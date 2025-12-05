@@ -1,0 +1,47 @@
+---
+title: "Team"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+---
+
+<style>
+body {
+  font-family: "Gill Sans", Roboto, sans-serif;
+  font-size: 18px;
+}
+h1, h2, h3 {
+  font-family: "Gill Sans", Roboto, sans-serif;
+}
+</style>
+
+## Meet our team
+
+Thank you very much for reading this far.  We hope our website has presented our achievements well.
+We are a group of first-year graduate students at the Columbia University Mailman School of Public Health.
+Here is more information about us.
+
+## Team Members
+
+### Mutian Li
+Website: [Personal Website](https://ssshhhlll.github.io/)
+
+### Linqi Chu
+Website: [Personal Website](https://linqichu.github.io/)
+
+### Hongda Chen
+Website: [Personal Website](https://hongdachen.github.io/hondachen.github.io/)
+
+### Chenchen Ma
+Website: [Personal Website](www.linkedin.com/in/chenchen-ma-220227316)
+
+
+
+
+
+
+
+
+

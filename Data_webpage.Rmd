@@ -1,0 +1,247 @@
+---
+title: "Data"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+  pdf_document:
+    toc: true
+---
+
+<style>
+body {
+  font-family: "Gill Sans", Roboto, sans-serif;
+  font-size: 18px;
+}
+h1, h2, h3 {
+  font-family: "Gill Sans", Roboto, sans-serif;
+}
+</style>
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(lubridate)
+library(janitor)
+
+knitr::opts_chunk$set(
+  fig.width = 7,
+  fig.height = 4.5,
+  out.width = "95%",
+  message = FALSE,
+  warning = FALSE
+)
+
+theme_set(theme_bw() + theme(legend.position = "bottom"))
+```
+
+
+## Initial Data
+Our project uses the publicly available Citi Bike system data provided by Lyft through the official Citi Bike website: “https://citibikenyc.com/system-data” The dataset includes detailed trip-level records for all rides taken within the selected month.
+Weather information was obtained from the Open-Meteo Weather API: "https://open-meteo.com/en/docs". Open-Meteo provides free, high-resolution historical and real-time weather data without requiring API keys.For this project, hourly historical weather data for New York City for the month corresponding to the Citi Bike trips was downloaded.
+
+
+## Data Cleaning and Preparation
+### Sampling of Citi Bike Trip Data (12 Months)
+Each month of 2024 contains between 2 and 6 Citi Bike CSV files, totaling approximately 50 million trip records across the year. To make the dataset computationally manageable for initial exploratory analysis and visualization, we randomly sampled 1,000 observations from each month. This produced a balanced dataset of 12,000 trips used for preliminary visualizations and descriptive analysis.
+```{r data import, eval = FALSE}
+months <- sprintf("%02d", 1:12)
+file_paths <- file.path(
+  path.expand("p8105_final_project/Data"),
+  paste0("2024", months, "-citibike-tripdata"),
+  paste0("2024", months, "-citibike-tripdata_1.csv")
+)
+
+sample_1k_readr <- function(path) {
+  df <- read_csv(
+    path,
+    col_types = cols(.default = col_character()),
+    show_col_types = FALSE,
+    guess_max = 100000
+  )
+
+
+  n_take <- min(1000L, nrow(df)) 
+  if (n_take == 0L) return(df[0, ]) 
+  dplyr::slice_sample(df, n = n_take)
+}
+
+citibike_sample_12k <- map_dfr(file_paths, sample_1k_readr)
+```
+
+
+### October Data Preparation
+October contains 6 separate Citi Bike CSV files. We randomly selected 1,000 observations from each file (for a total of 6,000 October trips) to use for more detailed modeling and weather-matched analyses. During preprocessing, timestamps were converted to UTC format for consistency and alignment with weather data. Then we carry out the screening and elimination of NA.
+```{r October data, eval = FALSE}
+# Build paths for the 6 October CSVs 
+oct_dir <- "Data/202410-citibike-tripdata"
+oct_paths <- file.path(
+  oct_dir,
+  paste0("202410-citibike-tripdata_", 1:6, ".csv")
+)
+
+sample_1k <- function(path) {
+  df <- read_csv(
+    path,
+    col_types = cols(.default = col_character()),
+    show_col_types = FALSE,
+    progress = FALSE
+  )
+  n_take <- min(1000L, nrow(df))
+  if (n_take == 0L) return(df[0, ])
+  dplyr::slice_sample(df, n = n_take)
+}
+
+# sample 1000 from each of 6 files and combine
+oct_sample6k <- map_dfr(oct_paths, sample_1k)
+
+# remove rows with ANY NA
+oct_clean <- oct_sample6k %>%
+  filter(if_all(everything(), ~ !is.na(.)))
+
+#  parse datetimes and compute duration
+oct_clean <- oct_clean %>%
+  mutate(
+    started_at = parse_date_time(
+      started_at,
+      orders = c("ymd HMS","ymd HM","ymd H","ymd",
+                 "Ymd HMS","Ymd HM","Ymd H","Ymd")
+    ),
+    ended_at   = parse_date_time(
+      ended_at,
+      orders = c("ymd HMS","ymd HM","ymd H","ymd",
+                 "Ymd HMS","Ymd HM","Ymd H","Ymd")
+    ),
+    duration = as.numeric(difftime(ended_at, started_at, units = "mins"))
+  )
+oct_filtered <- oct_clean %>%
+  filter(!is.na(duration), duration > 0, duration < 300)
+write_csv(
+  oct_filtered,
+  "Data/october_2024_sample6k_clean.csv"
+)
+```
+
+Because the weather data is recorded hourly, we aligned each trip with the correct weather record by truncating the started_at timestamp to the previous full hour. For example, a trip starting at 11:59 AM or 11:05 AM is assigned to the 11:00 AM weather observation.
+```{r Time of october data prepered, eval = FALSE}
+october_data <- read_csv("Data/october_2024_sample6k_clean.csv")
+
+october_data <- october_data %>%
+  mutate(
+    # parse as UTC; keep them in UTC
+    started_at = ymd_hms(started_at, tz = "UTC"),
+    ended_at   = ymd_hms(ended_at,   tz = "UTC"),
+    time = floor_date(started_at, "hour"),
+
+    duration = as.numeric(difftime(ended_at, started_at, units = "secs"))
+  )
+```
+
+
+
+### Weather Data Integration
+Weather information for October 2024 was downloaded from the Open-Meteo Historical Weather API, using UTC timestamps to ensure consistency with Citi Bike timestamps. The weather variables (e.g., temperature, precipitation, wind speed) were merged with the October trip data based on matching UTC time.
+```{r weather data, eval = FALSE}
+weather <- read_csv(
+  "Data/weather.csv",
+  skip = 3,             
+  show_col_types = FALSE,
+  col_types = cols(   
+    time = col_character(),
+    .default = col_double()
+  )
+) %>%
+  filter(!is.na(time)) %>%
+  rename(
+    temp_c       = `temperature_2m (C)`,
+    weather_code = `weather_code (wmo code)`,
+    wind_speed   = `wind_speed_100m (km/h)`,
+    precip_mm    = `precipitation (mm)`
+  ) %>%
+  mutate(
+    time = ymd_hm(time, tz = "UTC")
+  )
+
+merged <- october_data %>%
+  left_join(weather, by = "time")
+```
+
+
+
+### Computation of Trip Duration
+A new variable, duration, was created as the difference between ended_at and started_at. The duration was converted to seconds for interpretability. And we merged data.
+```{r Duration, eval = FALSE}
+october_data <- october_data %>%
+  mutate(
+    duration = as.numeric(difftime(ended_at, started_at, units = "secs"))
+  )
+```
+
+
+### Outlier Removal and Data Filtering
+Trips with erroneous or unrealistic duration values were excluded. Specifically, we removed trips with:
+duration < 0 minutes (invalid end/start times), and
+duration > 300 minutes (extreme long-duration outliers).
+```{r Filtering, eval = FALSE}
+# The code we used to filter before
+oct_clean <- oct_sample6k %>%
+  filter(if_all(everything(), ~ !is.na(.)))
+oct_filtered <- oct_clean %>%
+  filter(!is.na(duration), duration > 0, duration < 300)
+
+# NA checking, there is no NA.
+any(is.na(merged))
+colSums(is.na(october_data))
+
+```
+
+
+### New variable : day_type
+To better analyze which factors duration is related to, we have included the discussion on weekday and weekend. Therefore, new variables need to be added.
+```{r day_type, eval = FALSE}
+merged$day_type <- ifelse(wday(merged$started_at) %in% c(1, 7),
+                          "weekend", "weekday")
+merged$day_type <- factor(merged$day_type)
+```
+
+
+## Final Dataset Description
+
+The variables in our dataset are:
+
+* `ride_id`: A unique identifier for each individual Citi Bike user.
+* `rideable_type`: Type of bicycle used for the trip (`classic_bike` or `electric_bike`).
+* `started_at`: Timestamp (UTC) when the rider began the trip.
+* `ended_at`: Timestamp (UTC) when the rider ended the trip.
+* `start_station_name`: The name of the station where the trip began.
+* `start_station_id`: The numeric station ID where the trip began.
+* `end_station_name`: The name of the station where the trip ended.
+* `end_station_id`: The numeric station ID where the trip ended.
+* `start_lat`: Latitude of the starting station.
+* `start_lng`: Longitude of the starting station.
+* `end_lat`: Latitude of the ending station.
+* `end_lng`: Longitude of the ending station.
+* `member_casual`: Membership type (`member` = annual subscriber, `casual` = non-subscriber).
+* `duration`: Trip duration in seconds of difference between `started_at` and `ended_at`.
+* `time`: The hour that truncating the `started_at` timestamp to the previous full hour.
+* `temp_c`: Outdoor air temperature (°C) at the hour of the trip.
+* `weather_code`: Weather condition category (0 = clear, 3 = cloudy, 53 = moderate rain, etc.).
+* `wind_speed`: Wind speed at the time (km/h).
+* `precip_mm`: Precipitation at the time (mm).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
