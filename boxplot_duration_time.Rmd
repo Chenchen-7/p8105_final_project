@@ -12,7 +12,7 @@ library(plotly)
 # import the data
 ```{r}
 citibike_sample_12k = 
-  read.csv("/Users/hongdachen/Desktop/citibike_sample_12k.csv")
+  read.csv("data/citibike_sample_12k.csv")
 ```
 
 # clean the data
@@ -28,7 +28,8 @@ citibike_boxplot <- citibike_sample_12k %>%
 
 # boxplot 
 ```{r}
-plot_ly(
+Monthly_Ride_Duration_Distribution = 
+  plot_ly(
   data = citibike_boxplot,
   x = ~month,
   y = ~duration_min,
@@ -48,3 +49,5 @@ plot_ly(
     yaxis = list(title = "Ride Duration (minutes)")
   )
 ```
+
+

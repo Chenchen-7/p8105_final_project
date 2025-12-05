@@ -1,0 +1,474 @@
+---
+title: "Data Analysis"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+<style>
+body {
+  font-family: "Gill Sans", Roboto, sans-serif;
+  font-size: 18px;
+}
+h1, h2, h3 {
+  font-family: "Gill Sans", Roboto, sans-serif;
+}
+</style>
+
+```{r, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(stringr)
+library(readr)
+all_data = read_csv("./Data/merged_data_clean.csv")
+```
+
+```{r, include=FALSE}
+merged =
+  all_data |>
+  mutate(
+    member_casual = as.factor(member_casual),
+    rideable_type = as.factor(rideable_type),
+    weather_code  = as.factor(weather_code)
+  ) |>
+  mutate(
+    log_duration = log(duration)
+  )
+```
+
+# Model Selection
+Select models from Multiple Linear Regression, Random Forest and Gradient Boosting Machine
+
+1. Checking both RMSE and MAE for three baseline models
+`duration ~ temp_c + wind_speed + precip_mm + weather_code + member_casual + rideable_type`
+```{r eval=FALSE}
+# Checking MSE
+set.seed(1)
+train_index <- sample(nrow(merged), 0.8 * nrow(merged))
+train <- merged[train_index, ]
+test  <- merged[-train_index, ]
+
+model_lm_1 <- lm(duration ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = train)
+model_rf_1 <- randomForest::randomForest(
+  duration ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data = train
+)
+model_gbm_1 <- gbm::gbm(
+  duration ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data = train,
+  distribution = "gaussian",
+  n.trees = 3000, 
+  interaction.depth = 4,
+  shrinkage = 0.01,
+  cv.folds = 5
+)
+
+rmse <- function(actual, predicted) {
+  sqrt(mean((actual - predicted)^2))
+}
+
+rmse_lm  <- rmse(test$duration, predict(model_lm_1,  test))
+rmse_rf  <- rmse(test$duration, predict(model_rf_1,  test))
+rmse_gbm <- rmse(test$duration, predict(model_gbm_1, test, n.trees = 3000))
+
+cbind(
+  Model = c("LM", "Random Forest", "GBM"),
+  RMSE  = c(rmse_lm, rmse_rf, rmse_gbm)
+)
+
+# Checking both RMSE and MAE for three full models
+
+rmse <- function(actual, predicted) {
+  sqrt(mean((actual - predicted)^2))
+}
+
+# MAE function
+mae <- function(actual, predicted) {
+  mean(abs(actual - predicted))
+}
+
+# RMSE
+rmse_lm  <- rmse(test$duration, predict(model_lm_1,  test))
+rmse_rf  <- rmse(test$duration, predict(model_rf_1,  test))
+rmse_gbm <- rmse(test$duration, predict(model_gbm_1, test, n.trees = 3000))
+
+# MAE
+mae_lm  <- mae(test$duration, predict(model_lm_1,  test))
+mae_rf  <- mae(test$duration, predict(model_rf_1,  test))
+mae_gbm <- mae(test$duration, predict(model_gbm_1, test, n.trees = 3000))
+
+# Results
+cbind(
+  Model = c("LM", "Random Forest", "GBM"),
+  RMSE  = c(rmse_lm, rmse_rf, rmse_gbm),
+  MAE   = c(mae_lm, mae_rf, mae_gbm)
+)
+```
+![](results/model_results/three_models.png)
+
+2. Checking RMSE and MAE for all three log model
+`log_duration ~ temp_c + wind_speed + precip_mm + weather_code + member_casual + rideable_type`
+```{r eval=FALSE}
+# Checking MSE
+# duration for log
+set.seed(1)
+train_index <- sample(nrow(merged), 0.8 * nrow(merged))
+train <- merged[train_index, ]
+test  <- merged[-train_index, ]
+
+model_lm_log <- lm(log(duration) ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = train)
+model_rf_log <- randomForest::randomForest(
+  log(duration) ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = train
+)
+model_gbm_log <- gbm::gbm(
+  log(duration) ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type, data  = train,
+  distribution = "gaussian",
+  n.trees = 3000, 
+  interaction.depth = 4,
+  shrinkage = 0.01,
+  cv.folds = 5
+)
+
+# 1) Get predictions on the log scale
+pred_lm_log  <- predict(model_lm_log,  newdata = test)
+pred_rf_log  <- predict(model_rf_log,  newdata = test)
+pred_gbm_log <- predict(model_gbm_log, newdata = test, n.trees = 3000)
+
+# 2) Back-transform to the original duration scale
+pred_lm  <- exp(pred_lm_log)
+pred_rf  <- exp(pred_rf_log)
+pred_gbm <- exp(pred_gbm_log)
+
+# 3) Compute RMSE in original units (seconds)
+rmse_lm  <- rmse(test$duration, pred_lm)
+rmse_rf  <- rmse(test$duration, pred_rf)
+rmse_gbm <- rmse(test$duration, pred_gbm)
+
+mae <- function(actual, predicted) {
+  mean(abs(actual - predicted))
+}
+
+mae_lm  <- mae(test$duration, pred_lm)
+mae_rf  <- mae(test$duration, pred_rf)
+mae_gbm <- mae(test$duration, pred_gbm)
+
+
+cbind(
+  Model = c("LM", "Random Forest", "GBM"),
+  RMSE  = c(rmse_lm, rmse_rf, rmse_gbm),
+  MAE   = c(mae_lm, mae_rf, mae_gbm)
+)
+```
+![](results/model_results/log_model.png)
+
+3. Checking RMSE and MAE for all three reduced model 
+`duration ~ temp_c + member_casual`
+```{r eval=FALSE}
+# Checking MSE for reduced model
+set.seed(1)
+train_index <- sample(nrow(merged), 0.8 * nrow(merged))
+train <- merged[train_index, ]
+test  <- merged[-train_index, ]
+
+model_lm_0 <- lm(duration ~ temp_c + member_casual, data  = train)
+model_rf_0 <- randomForest::randomForest(
+  duration ~ temp_c + member_casual, data = train
+)
+model_gbm_0 <- gbm::gbm(
+  duration ~ temp_c + member_casual, data = train,
+  distribution = "gaussian",
+  n.trees = 3000, 
+  interaction.depth = 4,
+  shrinkage = 0.01,
+  cv.folds = 5
+)
+
+rmse <- function(actual, predicted) {
+  sqrt(mean((actual - predicted)^2))
+}
+
+# MAE function
+mae <- function(actual, predicted) {
+  mean(abs(actual - predicted))
+}
+
+# RMSE
+rmse_lm  <- rmse(test$duration, predict(model_lm_0,  test))
+rmse_rf  <- rmse(test$duration, predict(model_rf_0,  test))
+rmse_gbm <- rmse(test$duration, predict(model_gbm_0, test, n.trees = 3000))
+
+# MAE
+mae_lm  <- mae(test$duration, predict(model_lm_0,  test))
+mae_rf  <- mae(test$duration, predict(model_rf_0,  test))
+mae_gbm <- mae(test$duration, predict(model_gbm_0, test, n.trees = 3000))
+
+# Results
+cbind(
+  Model = c("LM", "Random Forest", "GBM"),
+  RMSE  = c(rmse_lm, rmse_rf, rmse_gbm),
+  MAE   = c(mae_lm, mae_rf, mae_gbm)
+)
+```
+![](results/model_results/reduced_models.png)
+
+In this analysis, we use **Mean Absolute Error (MAE)** rather than **Root Mean Squared Error (RMSE)** as the primary evaluation metric. Trip duration in the Citi Bike data is highly right-skewed, with many extreme long-duration trips. Because RMSE squares the errors, it is disproportionately influenced by these outliers and therefore does not reflect typical prediction accuracy. In contrast, MAE weights all errors equally and is robust to skewed distributions, making it a more appropriate and interpretable metric for evaluating models on this dataset. For these reasons, MAE provides a fairer and more stable basis for model comparison.
+
+Cross validation for three full model with log(duration)
+![](results/model_results/CV_all_model.png)
+
+Using 5-fold cross-validated MAE on the log-transformed duration outcome, we compared linear regression, random forest, and gradient boosting models. All three methods achieved very similar predictive accuracy, with MAE values around 0.63. Linear regression had the lowest cross-validated MAE (0.6263), followed closely by GBM (0.6265), while random forest performed slightly worse (0.6287). Given the nearly identical performance and the greater interpretability of linear regression, we selected the linear regression model for further refinement and diagnostic analysis.
+
+# Multiple Linear Regression
+We evaluated five candidate linear regression models for predicting the log-transformed trip duration. The models differed in their inclusion of polynomial terms and interaction terms:
+
+Base model: `log(duration) ~ temp_c + wind_speed + precip_mm + weather_code + member_casual + rideable_type + day_typeweekend`
+
+lm1: Base model with main effects only
+
+lm2: Base model + polynomial temperature term
+
+lm3: Base model + member × weather interaction
+
+lm4: Polynomial + interaction model
+
+lm5: Full model with all polynomials and interactions
+```{r eval=FALSE}
+library(lubridate)
+merged$day_type <- ifelse(wday(merged$started_at) %in% c(1, 7),
+                          "weekend", "weekday")
+merged$day_type <- factor(merged$day_type)
+
+# Based lm model
+lm1 <- lm(log(duration) ~ temp_c + wind_speed + precip_mm +
+            weather_code + member_casual + rideable_type + day_type,
+          data = merged)
+
+# Add one polynomials - temp² only — because temperature is smoother
+lm2 <- lm(log(duration) ~ temp_c + I(temp_c^2) +
+            wind_speed + precip_mm +
+            weather_code + member_casual + rideable_type + day_type,
+          data = merged)
+
+# Add one interaction - member × weather_code
+lm3 <- lm(log(duration) ~ temp_c + wind_speed + precip_mm +
+            weather_code + member_casual + rideable_type +
+            member_casual:weather_code + day_type,
+          data = merged)
+
+# Add Polynomials + key interaction
+lm4 <- lm(log(duration) ~ temp_c + I(temp_c^2) +
+            wind_speed + precip_mm +
+            weather_code + member_casual + rideable_type +
+            member_casual:weather_code + day_type,
+          data = merged)
+
+# Full model
+lm5 <- lm(log(duration) ~ temp_c + I(temp_c^2) +
+            wind_speed + I(wind_speed^2) +
+            precip_mm +
+            weather_code + member_casual + rideable_type +
+            temp_c:precip_mm + member_casual:weather_code + day_type,
+          data = merged)
+
+```
+
+Because linear models must balance prediction accuracy, interpretability, and parsimony, we compared these models using AIC, BIC, and 5-fold cross-validated MAE.
+
+1. AIC Comparison (Lower = Better)
+AIC penalizes model complexity but allows moderately complex models if they improve prediction.
+![](results/model_results/AIC.png)
+lm3 achieves the lowest AIC, indicating it provides the best balance between fit and complexity.
+lm4 and lm5 are slightly worse, suggesting additional polynomial and interaction terms do not improve prediction.
+Simple models (lm1 and lm2) perform worse under AIC.
+
+2. BIC Comparison (Lower = Better)
+BIC penalizes complexity more heavily than AIC and often prefers simpler models.
+![](results/model_results/BIC.png)
+lm1 has the lowest BIC, clearly preferred due to fewer parameters.
+
+Models with higher complexity (lm3–lm5) are heavily penalized.
+
+3. CV-MAE Comparison (Prediction Accuracy)
+```{r eval=FALSE}
+library(dplyr)
+library(randomForest)
+library(gbm)
+
+# 1. Prepare data
+
+# Keep only valid durations and needed variables
+data_model <- merged |>
+  filter(duration > 0) |>
+  mutate(log_duration = log(duration)) |>
+  select(log_duration, temp_c, wind_speed, precip_mm,
+         weather_code, member_casual, rideable_type) |>
+  na.omit()
+
+# Base model formula (same for LM, RF, GBM)
+form_base <- log_duration ~ temp_c + wind_speed + precip_mm +
+  weather_code + member_casual + rideable_type
+
+# 2. Set up k-fold CV
+
+set.seed(123)
+k <- 5
+n <- nrow(data_model)
+fold_id <- sample(rep(1:k, length.out = n))
+
+mae_lm  <- numeric(k)
+mae_rf  <- numeric(k)
+mae_gbm <- numeric(k)
+
+mae_fun <- function(actual, pred) mean(abs(actual - pred))
+
+# 3. Run CV loop
+
+for (i in 1:k) {
+  cat("Fold", i, "...\n")
+  
+  train <- data_model[fold_id != i, ]
+  test  <- data_model[fold_id == i, ]
+  
+  ## (1) Linear model
+  fit_lm <- lm(form_base, data = train)
+  pred_lm <- predict(fit_lm, newdata = test)
+  mae_lm[i] <- mae_fun(test$log_duration, pred_lm)
+  
+  ## (2) Random forest
+  fit_rf <- randomForest(
+    form_base,
+    data = train,
+    ntree = 300
+  )
+  pred_rf <- predict(fit_rf, newdata = test)
+  mae_rf[i] <- mae_fun(test$log_duration, pred_rf)
+  
+  ## (3) GBM
+  fit_gbm <- gbm(
+    form_base,
+    data = train,
+    distribution = "gaussian",
+    n.trees = 1000,
+    interaction.depth = 3,
+    shrinkage = 0.01,
+    n.minobsinnode = 20,
+    verbose = FALSE
+  )
+  pred_gbm <- predict(fit_gbm, newdata = test, n.trees = 1000)
+  mae_gbm[i] <- mae_fun(test$log_duration, pred_gbm)
+}
+
+# 4. Summarize CV-MAE
+
+cv_mae_results <- data.frame(
+  Model   = c("Linear regression", "Random forest", "GBM"),
+  Mean_MAE = c(mean(mae_lm), mean(mae_rf), mean(mae_gbm)),
+  SD_MAE   = c(sd(mae_lm),   sd(mae_rf),   sd(mae_gbm))
+)
+
+cv_mae_results
+
+```
+To evaluate out-of-sample prediction performance, we used 5-fold cross-validation with mean absolute error (MAE) on the log(duration) outcome.
+![](results/model_results/CV-MAE.png)
+lm3 performs best, with the lowest cross-validated MAE.
+lm1 is close but slightly worse.
+lm4 and lm5 suffer from rank deficiency, meaning polynomial+interaction structures created multicollinearity and empty factor levels, making them unsuitable for CV or reliable interpretation.
+
+lm3 is selected as the final regression model because it achieves the best balance of predictive accuracy, statistical justification, interpretability, and stability.  It outperforms the base model (lm1) in AIC and cross-validated MAE while avoiding the multicollinearity and rank-deficiency problems seen in more complex models (lm4 and lm5).
+
+4. The final model
+`log(duration)∼temp_c+wind_speed+precip_mm+weather_code+member_casual+rideable_type+(member_casual×weather_code)+ day_typeweekend`
+N = 5987
+Residual SE = 0.777
+Adjusted R² = 0.05704
+
+While R² is low (as expected for human mobility data), the model is statistically significant (F = 20.6, p < 2e−16) and captures several strong behavioral and weather-related patterns.
+
+![](results/model_results/results_1.png)
+![](results/model_results/results_2.png)
+
+A QQ plot confirms that the raw duration values deviate substantially from normality, especially in the upper quantiles. To reduce skewness, we applied a log transformation using log(duration + 1). After transformation, the mean and median become 2.33 and 2.30, much closer together, and the QQ plot shows a more linear pattern.
+![](results/ynormal/duration_qq_log-1.png)
+
+The final model uses a log-transformed trip duration as the outcome and includes weather conditions, rider type, bike type, day type, and weather–membership interactions.
+
+Temperature has a positive association with trip duration (β = 0.0073, p < 0.001), indicating that warmer weather slightly increases ride length, while wind speed has a negative effect (β = –0.0026, p = 0.038), suggesting that stronger winds shorten trips.  Several weather categories reduce duration compared with clear weather, especially heavy rain (weather_code 53, β = –2.63, p = 0.006) and thunderstorms (weather_code 63, β = –8.57, p = 0.045).
+
+Casual riders take significantly longer trips than members (β = –0.466, p < 2e-16 on log scale), and electric bikes are associated with slightly longer duration (β = 0.078, p < 0.001). Weekend trips are about 13.8% longer than weekday trips (exp(0.1291) = 1.138; p < 0.001).
+
+Interaction terms show that weather conditions affect casual riders differently than members. For example, in weather_code 1, casual riders ride 24% longer than members (exp(0.2118) ≈ 1.24; p = 0.009), and similar differential effects appear in codes 3 and 53.
+
+The model explains a modest amount of variation in duration (Adjusted R² ≈ 0.057), which is expected for human mobility data. However, the included predictors are statistically significant and provide meaningful insights into how weather, membership, and day type jointly influence trip duration.
+
+![](results/model_results/predicted_model.png)
+```{r eval=FALSE}
+library(dplyr)
+library(ggplot2)
+
+newdata <- expand.grid(
+  temp_c = mean(merged$temp_c, na.rm = TRUE),
+  wind_speed = mean(merged$wind_speed, na.rm = TRUE),
+  precip_mm = mean(merged$precip_mm, na.rm = TRUE),
+  weather_code = unique(merged$weather_code),
+  member_casual = c("casual", "member"),
+  rideable_type = "electric_bike",
+  day_type = c("weekday", "weekend")
+)
+
+# Predict log duration
+newdata$pred_log <- predict(lm3, newdata)
+
+# Convert to seconds
+newdata$pred_duration_seconds <- exp(newdata$pred_log)
+
+# Convert to minutes
+newdata$pred_duration_min <- newdata$pred_duration_seconds / 60
+
+# Plot
+ggplot(newdata, aes(x = factor(weather_code,
+             levels = c(0,1,2,3,51,53,63),
+             labels = c("Clear sky","Mainly clear","Fog/Mist","Cloudy",
+                        "Light drizzle","Moderate rain","Heavy rain")), 
+                    y = pred_duration_min, 
+                    color = member_casual, group = member_casual)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Predicted Trip Duration by Weather Condition and Membership",
+    x = "Weather Code",
+    y = "Predicted Duration (minutes)",
+    color = "Rider Type"
+  ) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+ggplot(newdata, aes(x = factor(weather_code,
+             levels = c(0,1,2,3,51,53,63),
+             labels = c("Clear sky","Mainly clear","Fog/Mist","Cloudy",
+                        "Light drizzle","Moderate rain","Heavy rain")),
+                    y = pred_duration_min,
+                    color = member_casual,
+                    linetype = day_type,
+                    group = interaction(member_casual, day_type))) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
+  labs(
+    title = "Predicted Trip Duration by Weather, Membership, and Day Type",
+    x = "Weather Condition",
+    y = "Predicted Duration (minutes)",
+    color = "Rider Type",
+    linetype = "Day Type"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+```
+
+This graph shows the predicted travel duration based on the model under different weather conditions, respectively for leisure passengers and member passengers, and further distinguishes them according to the working day and weekend modes. Under all weather conditions, whether on weekdays or weekends, the curve for leisure riders is above the curve for members. This is in line with the idea that leisure passengers mainly engage in leisure travel, while members tend to prefer short and practical trips. For both regular and member passengers, the dotted line (on weekends) is higher than the solid line (on weekdays), reflecting the return finding that the travel time on weekends is approximately 14% longer. The effect is especially strong this weekend when the weather is fine.
+
+It is expected to last the longest under clear, mainly clear, foggy/misty and cloudy weather. The duration gradually decreases as the weather worsens. In both moderate and heavy rain, the predicted duration for both types of riders will drop sharply. For heavy rain, the expected duration is close to zero, consistent with almost no cycling. This mode emphasizes that bad weather significantly shortens the journey length, especially for temporary riders. On fine weather days (sunny, mostly sunny, with fog/light fog), the duration of leisure working days and leisure weekends varies more significantly than that of members. In the light rain, the gap between leisure and membership has narrowed.  Under moderate rain conditions, the membership effect is more extreme, reflecting the interaction term of the model. This indicates that the behavior of leisure riders is more sensitive to the weather than that of members.
