@@ -1,0 +1,21 @@
+---
+title: "Duration Boxplot"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(knitr)
+```
+
+Row {data-height=700}
+-----------------------------------------------------------------------
+
+### 12-Month Ride Duration Boxplot (2024)
+
+```{r}
+knitr::include_graphics("results/12month_duration_boxplot.png")
+```
