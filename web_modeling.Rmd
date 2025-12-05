@@ -179,21 +179,21 @@ lm5 <- lm(log(duration) ~ temp_c + I(temp_c^2) +
 
 Because linear models must balance prediction accuracy, interpretability, and parsimony, we compared these models using AIC, BIC, and 5-fold cross-validated MAE.
 
-## AIC Comparison (Lower = Better): 
+1. AIC Comparison (Lower = Better)
 AIC penalizes model complexity but allows moderately complex models if they improve prediction.
 ![](results/model_results/AIC.png)
 lm3 achieves the lowest AIC, indicating it provides the best balance between fit and complexity.
 lm4 and lm5 are slightly worse, suggesting additional polynomial and interaction terms do not improve prediction.
 Simple models (lm1 and lm2) perform worse under AIC.
 
-## BIC Comparison (Lower = Better): 
+2. BIC Comparison (Lower = Better)
 BIC penalizes complexity more heavily than AIC and often prefers simpler models.
 ![](results/model_results/BIC.png)
 lm1 has the lowest BIC, clearly preferred due to fewer parameters.
 
 Models with higher complexity (lm3–lm5) are heavily penalized.
 
-## CV-MAE Comparison (Prediction Accuracy):
+3. CV-MAE Comparison (Prediction Accuracy)
 ```{r eval=FALSE}
 library(dplyr)
 library(randomForest)
@@ -282,7 +282,7 @@ lm4 and lm5 suffer from rank deficiency, meaning polynomial+interaction structur
 
 lm3 is selected as the final regression model because it achieves the best balance of predictive accuracy, statistical justification, interpretability, and stability.  It outperforms the base model (lm1) in AIC and cross-validated MAE while avoiding the multicollinearity and rank-deficiency problems seen in more complex models (lm4 and lm5).
 
-## The final model:
+4. The final model
 `log(duration)∼temp_c+wind_speed+precip_mm+weather_code+member_casual+rideable_type+(member_casual×weather_code)+ day_typeweekend`
 N = 5987
 Residual SE = 0.777
