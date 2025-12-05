@@ -5,8 +5,9 @@ output:
     toc: true
     toc_float: true
     code_folding: hide
-    
 ---
+
+```{=html}
 <style>
 body {
   font-family: "Gill Sans", Roboto, sans-serif;
@@ -16,6 +17,7 @@ h1, h2, h3 {
   font-family: "Gill Sans", Roboto, sans-serif;
 }
 </style>
+```
 
 In this page we will explore a set of Citi Bike usage data and users' usage patterns.
 
@@ -91,7 +93,6 @@ hourly_usage =
 hourly_usage
 ```
 
-
 ![](results/hourly_usage_pattern.png)
 
 # User Behavior Analysis
@@ -126,9 +127,109 @@ avg_duration =
       plot.title = element_text(hjust = 0.5, face = "bold"),
       legend.position = "top"
     )
+
+# Calculate ride duration in minutes
+data =
+  data |>
+  mutate(
+    started_at = ymd_hms(started_at),
+    ended_at = ymd_hms(ended_at),
+    duration_min = as.numeric(difftime(ended_at, started_at, units = "mins")),
+    month = floor_date(started_at, "month"),
+    month_label = format(started_at, "%Y-%m")
+  ) |>
+   filter(year(started_at) == 2024)
+
+# Filter out anomalies (duration between 0 and 200 minutes)
+data_clean =
+  data |>
+  filter(duration_min > 0 & duration_min < 200)
+
+glimpse(
+  data_clean
+)
+
+## duration
+
+duration_monthly <- data_clean %>%
+  group_by(month_label, member_casual) %>%
+  summarise(
+    avg_duration = mean(duration_min, na.rm = TRUE),
+    median_duration = median(duration_min, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+duration_monthly
+
+ggplot(duration_monthly, aes(
+  x = month_label,
+  y = avg_duration,
+  color = member_casual,
+  group = member_casual
+)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Monthly Average Ride Duration: Members vs Casual Riders",
+    x = "Month",
+    y = "Average Duration (minutes)",
+    color = "User Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+ggplot(duration_monthly, aes(
+  x = month_label,
+  y = avg_duration,
+  fill = member_casual
+)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Average Ride Duration by Month: Members vs Casual Riders",
+    x = "Month",
+    y = "Average Duration (minutes)",
+    fill = "User Type"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+## counts
+
+count_monthly <- data_clean %>%
+  group_by(month_label, member_casual) %>%
+  summarise(
+    ride_count = n(),
+    .groups = "drop"
+  )
+
+count_monthly
+
+ggplot(count_monthly, aes(
+  x = month_label,
+  y = ride_count,
+  fill = member_casual
+)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Monthly Ride Counts: Members vs Casual Riders",
+    x = "Month",
+    y = "Number of Rides",
+    fill = "User Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
 ```
 
-![](results/average_duration.png)
+![](results/membership/compare_duration_hist-1.png) ![](results/membership/compare_duration_line-1.png)
+
+In terms of ride duration, casual riders consistently take longer trips than members in every month of 2024. Overall, casual riders typically spend between 15 and 21 minutes per trip, whereas members maintain a much shorter and more stable range of roughly 10 to 12 minutes. A noticeable spike in casual ride duration appears around April and May, which further widens the gap between the two user types. These differences align with the well-established behavioral patterns of Citi Bike users: casual riders often engage in leisure, tourism, or exploratory rides, which naturally leads to longer trip times, while members tend to use bikes for commuting or short point-to-point travel, resulting in shorter, more predictable ride durations.
+
+![](results/membership/compare_counts_hist-1.png)
 
 The pattern becomes even more striking when examining ride frequency. Although casual riders spend more time per trip, overall system usage is overwhelmingly driven by members. In our dataset, members consistently completed around 750 to 850 trips per month, compared with significantly fewer trips from casual riders. Furthermore, casual ridership exhibits strong seasonality—low in winter, peaking during the summer months, and declining again in the fall—while member ridership remains comparatively stable throughout the year. This stability reinforces the idea that members rely on Citi Bike for routine, utilitarian transportation, whereas casual users are more sensitive to weather and seasonal tourism patterns.
 
@@ -170,6 +271,7 @@ The figure above presents the monthly distribution of cycling data over a 12-mon
 # Bike Type Comparison
 
 ### Monthly ride count comparison by bike type
+
 ```{r, eval=FALSE}
 total_ride =
   monthly_stats |>
@@ -204,6 +306,7 @@ total_ride
 Both bike types maintain relatively stable usage patterns throughout the year with minimal monthly fluctuation. Classic bike usage hits its lowest point in July (319 rides), possibly due to excessive heat. The usage of electric bikes is approximately twice that of classic bikes, averaging around 650 and 340 rides per month, respectively. Electric bikes are clearly more popular, likely because they require less physical effort and better serve practical purposes like commuting.
 
 ### Average ride duration comparison by bike type
+
 ```{r, eval=FALSE}
 avg_duration = 
   monthly_stats |>
@@ -236,11 +339,10 @@ avg_duration
 
 ![](results/average_duration.png)
 
-Both bike types show clear seasonal trends, with longer rides during warmer months (May-October) and shorter rides in winter months (January, February, December). December shows a dramatic drop for both types, falling to around 9.7 minutes.
-The gap is most pronounced in spring/summer (April-July), where electric bikes average 0.5-1 minute longer per ride. In fall/winter months (September-December), the two converge, with classic bikes surpassing electric bikes briefly in September.
-Electric bikes generally have slightly longer average duration than classic bikes during most months. This may be because the electric assist enables them to travel farther distances comfortably. Classic bike riders maintain more consistent duration (11-13.4 minutes), suggesting they use bikes for predictable short trips.
+Both bike types show clear seasonal trends, with longer rides during warmer months (May-October) and shorter rides in winter months (January, February, December). December shows a dramatic drop for both types, falling to around 9.7 minutes. The gap is most pronounced in spring/summer (April-July), where electric bikes average 0.5-1 minute longer per ride. In fall/winter months (September-December), the two converge, with classic bikes surpassing electric bikes briefly in September. Electric bikes generally have slightly longer average duration than classic bikes during most months. This may be because the electric assist enables them to travel farther distances comfortably. Classic bike riders maintain more consistent duration (11-13.4 minutes), suggesting they use bikes for predictable short trips.
 
 ### Market share trend by bike type
+
 ```{r, eval=FALSE}
 mkt_share =
   data_clean |>
@@ -280,8 +382,7 @@ mkt_share
 
 ![](results/market_share.png)
 
-Electric bikes consistently dominate the market, holding approximately 65% market share throughout the year.
-Electric bikes gain approximately 4.5 % points of market share over the year. Electric bike share gradually increases from 63.5% (January) to peak at 68.1% (July), then stabilizes around 66-68% for the remainder of the year, while classic bikes experience a corresponding decline from 36.5% (January) to a low of 31.9% (July).
+Electric bikes consistently dominate the market, holding approximately 65% market share throughout the year. Electric bikes gain approximately 4.5 % points of market share over the year. Electric bike share gradually increases from 63.5% (January) to peak at 68.1% (July), then stabilizes around 66-68% for the remainder of the year, while classic bikes experience a corresponding decline from 36.5% (January) to a low of 31.9% (July).
 
 ### Bike type preference by user type
 
@@ -456,8 +557,7 @@ We first examined the distribution of the response variable, ride duration, in t
 
 ### Correlation heatmap
 
-The correlation heatmap shows that the linear relationships between all predictors are extremely weak (all values ≤ 0.21), with weather conditions (precipitation and weather code at 0.21) showing the strongest.
-Among all independent variables, the user type shows the most noticeable linear relationship with bike duration (with a correlation of -0.22), while all other variables, including weather conditions, temperature, and wind speed, exhibit only an extremely weak linear correlation with riding duration.
+The correlation heatmap shows that the linear relationships between all predictors are extremely weak (all values ≤ 0.21), with weather conditions (precipitation and weather code at 0.21) showing the strongest. Among all independent variables, the user type shows the most noticeable linear relationship with bike duration (with a correlation of -0.22), while all other variables, including weather conditions, temperature, and wind speed, exhibit only an extremely weak linear correlation with riding duration.
 
 ```{r, eval=FALSE}
 
@@ -519,4 +619,3 @@ ggsave(
 ```
 
 ![](results/correlation_heatmap_all_variables.png)
-
