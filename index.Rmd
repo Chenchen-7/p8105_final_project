@@ -20,12 +20,7 @@ The insights gained from this analysis support strategies for system optimizatio
 
 
 ### Video
-
-<div class="video-container">
-<iframe src="https://www.youtube.com/watch?v=9kzE8isXlQY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-</div>
-
-<br>
+![](results/citi-bike.png)
 
 
 ### Initial Questions
