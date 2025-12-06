@@ -83,7 +83,7 @@ In terms of ride duration, casual riders consistently take longer trips than mem
 
 ![](results/membership/compare_counts_hist-1.png)
 
-The pattern becomes even more striking when examining ride frequency. Although casual riders spend more time per trip, overall system usage is overwhelmingly driven by members. In our dataset, members consistently completed around 750 to 850 trips per month, compared with significantly fewer trips from casual riders. Furthermore, casual ridership exhibits strong seasonality—low in winter, peaking during the summer months, and declining again in the fall—while member ridership remains comparatively stable throughout the year. This stability reinforces the idea that members rely on Citi Bike for routine, utilitarian transportation, whereas casual users are more sensitive to weather and seasonal tourism patterns.
+The pattern becomes even more striking when examining ride frequency. Although casual riders spend more time per trip, overall system usage is overwhelmingly driven by members. In our dataset, members consistently completed around 750 to 850 trips per month, compared with significantly fewer trips from casual riders. Furthermore, casual ridership exhibits strong seasonality, low in winter, peaking during the summer months, and declining again in the fall, while member ridership remains comparatively stable throughout the year. This stability reinforces the idea that members rely on Citi Bike for routine, utilitarian transportation, whereas casual users are more sensitive to weather and seasonal tourism patterns.
 
 ![](results/monthly_ride_duration.png)
 The figure above presents the monthly distribution of cycling data over a 12-month period. The distribution of Citibike ride durations shows a strong seasonal pattern. Winter months have the shortest and most uniform ride times, suggesting essential and short-distance travel. As temperatures increase in spring and peak in summer, both median duration and variability rise, accompanied by more long rides exceeding 100 minutes. These patterns indicate that warm weather months encourage longer and more diverse cycling activities, while colder seasons constrain both duration and behavioral variability.
@@ -117,10 +117,13 @@ Both bike types show clear commuter patterns with morning (8am) and evening (5pm
 # Additional analysis (Model Selection)
 ### Descriptive statistics
 
-We first examined the distribution of the response variable, ride duration, in the October 2024 dataset. The raw duration values show a strong right-skewed distribution, with most trips concentrated below 20 minutes and a long tail extending beyond 100 minutes, as shown in the histogram. The mean duration is 12.28 minutes, while the median is 9.01 minutes, indicating that extreme long trips pull the mean upward
+We first examined the distribution of the response variable, ride duration, in the October 2024 dataset. The raw duration values show a strong right-skewed distribution, with most trips concentrated below 20 minutes and a long tail extending beyond 100 minutes, as shown in the histogram. The mean duration is 12.28 minutes, while the median is 9.01 minutes, indicating that extreme long trips pull the mean upward.
 
 ![](results/ynormal/duration_histogram_original-1.png)
 ![](results/ynormal/duration_qq_original-1.png)
+
+A Q–Q plot confirms that the raw duration values deviate substantially from normality, especially in the upper quantiles. To reduce skewness, we applied a log transformation using log(duration + 1). After transformation, the mean and median become 2.33 and 2.30, much closer together, and the Q–Q plot shows a more linear pattern.
+
 ![](results/ynormal/duration_qq_log-1.png)
 
 ### Correlation heatmap

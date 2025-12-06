@@ -521,12 +521,12 @@ Although casual riders spend more time per trip, overall system usage is
 overwhelmingly driven by members. In our dataset, members consistently
 completed around 750 to 850 trips per month, compared with significantly
 fewer trips from casual riders. Furthermore, casual ridership exhibits
-strong seasonality—low in winter, peaking during the summer months, and
-declining again in the fall—while member ridership remains comparatively
-stable throughout the year. This stability reinforces the idea that
-members rely on Citi Bike for routine, utilitarian transportation,
-whereas casual users are more sensitive to weather and seasonal tourism
-patterns.</p>
+strong seasonality, low in winter, peaking during the summer months, and
+declining again in the fall, while member ridership remains
+comparatively stable throughout the year. This stability reinforces the
+idea that members rely on Citi Bike for routine, utilitarian
+transportation, whereas casual users are more sensitive to weather and
+seasonal tourism patterns.</p>
 <p><img src="results/monthly_ride_duration.png" /> The figure above
 presents the monthly distribution of cycling data over a 12-month
 period. The distribution of Citibike ride durations shows a strong
@@ -616,10 +616,15 @@ duration, in the October 2024 dataset. The raw duration values show a
 strong right-skewed distribution, with most trips concentrated below 20
 minutes and a long tail extending beyond 100 minutes, as shown in the
 histogram. The mean duration is 12.28 minutes, while the median is 9.01
-minutes, indicating that extreme long trips pull the mean upward</p>
+minutes, indicating that extreme long trips pull the mean upward.</p>
 <p><img src="results/ynormal/duration_histogram_original-1.png" /> <img
-src="results/ynormal/duration_qq_original-1.png" /> <img
-src="results/ynormal/duration_qq_log-1.png" /></p>
+src="results/ynormal/duration_qq_original-1.png" /></p>
+<p>A Q–Q plot confirms that the raw duration values deviate
+substantially from normality, especially in the upper quantiles. To
+reduce skewness, we applied a log transformation using log(duration +
+1). After transformation, the mean and median become 2.33 and 2.30, much
+closer together, and the Q–Q plot shows a more linear pattern.</p>
+<p><img src="results/ynormal/duration_qq_log-1.png" /></p>
 </div>
 <div id="correlation-heatmap" class="section level3">
 <h3>Correlation heatmap</h3>
