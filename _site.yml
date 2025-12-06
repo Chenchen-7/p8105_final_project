@@ -1,21 +1,36 @@
 name: "p8105_final_project"
+
 navbar:
   title: "Home"
   right:
     - text: "Data"
       href: Data_webpage.html
+
     - text: "Shiny"
-      href: shiny.html
+      menu:
+        - text: "Dashboard"
+          href: duration_boxplot_dashboard.html
+        - text: "Shiny app"
+          href: "https://mutili.shinyapps.io/shiny_app/"
+
     - text: "Analyses"
-      href: analyses.html
+      menu:
+        - text: "Visualization"
+          href: Analyses.html
+        - text: "Modeling"
+          href: web_modeling.html
+
     - text: "Report"
-      href: report.html
+      href: web_modeling.html
+
     - text: "About Us"
-      href: team_webpage.html
+      href: Team_webpage.html
+
     - icon: fa-github fa-lg
-      href: https://github.com/Chenchen-7/p8105_final_project
+      href: "https://github.com/Chenchen-7/p8105_final_project"
 
 output:
   html_document:
     theme: flatly
     css: styles.css
+
