@@ -2,20 +2,10 @@
 title: "Citi Bike Usage & Ride Duration Modeling"
 output:
   html_document:
+    css: style.css
     toc: true
     toc_float: true
-    theme: flatly
 ---
-
-<style>
-body {
-  font-family: "Gill Sans", Roboto, sans-serif;
-  font-size: 18px;
-}
-h1, h2, h3 {
-  font-family: "Gill Sans", Roboto, sans-serif;
-}
-</style>
 
 # Motivation
 New York City's Citi Bike system has become an integral part of the urban transportation landscape, with over 25,000 bikes and 1,500 stations serving millions of riders annually across Manhattan, Brooklyn, Queens, and the Bronx.  Since its launch in 2013, the system has transformed how New Yorkers navigate the city, offering a flexible alternative that fills the gap between subway transit and walking.  The year 2024 is particularly meaningful as the system continues to expand its fleet and coverage across New York City.

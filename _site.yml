@@ -22,10 +22,10 @@ navbar:
       href: Analyses.html
 
     - text: "Report"
-      href: dashboard.html
+      href: Report_webpage.html
 
     - text: "About Us"
-      href: mailto:ml5308@cumc.columbia.edu
+      href: Team_webpage.html
 
     - text: ""
       icon: fa-github fa-lg

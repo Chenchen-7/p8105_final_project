@@ -2,20 +2,10 @@
 title: "Team"
 output:
   html_document:
+    css: style.css
     toc: true
     toc_float: true
-    theme: flatly
 ---
-
-<style>
-body {
-  font-family: "Gill Sans", Roboto, sans-serif;
-  font-size: 18px;
-}
-h1, h2, h3 {
-  font-family: "Gill Sans", Roboto, sans-serif;
-}
-</style>
 
 ## Meet our team
 
