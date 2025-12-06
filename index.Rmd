@@ -20,7 +20,8 @@ The insights gained from this analysis support strategies for system optimizatio
 
 
 ### Video
-![](results/citi-bike.png)
+![](results/citi-bike.jpg)
+
 
 
 ### Initial Questions
