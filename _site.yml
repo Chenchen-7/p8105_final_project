@@ -1,36 +1,36 @@
-name: "p8105_final_project"
+name: "ds1-final-project"
+output_dir: "."
 
 navbar:
   title: "Home"
   right:
+
+    # - text: "Home"
+    #   href: index.html
+
     - text: "Data"
       href: Data_webpage.html
 
-    - text: "Shiny"
+    - text: "Shiny App"
       menu:
+        - text: "Interactive Map"
+          href: https://mutili.shinyapps.io/shiny_app/
         - text: "Dashboard"
           href: duration_boxplot_dashboard.html
-        - text: "Shiny app"
-          href: "https://mutili.shinyapps.io/shiny_app/"
 
     - text: "Analyses"
-      menu:
-        - text: "Visualization"
-          href: Analyses.html
-        - text: "Modeling"
-          href: web_modeling.html
+      href: Analyses.html
 
     - text: "Report"
-      href: web_modeling.html
+      href: dashboard.html
 
     - text: "About Us"
-      href: Team_webpage.html
+      href: mailto:ml5308@cumc.columbia.edu
 
-    - icon: fa-github fa-lg
-      href: "https://github.com/Chenchen-7/p8105_final_project"
+    - text: ""
+      icon: fa-github fa-lg
+      href: https://github.com/Chenchen-7/p8105_final_project
 
 output:
   html_document:
-    theme: flatly
     css: styles.css
-

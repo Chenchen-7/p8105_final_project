@@ -1,298 +1,522 @@
 <!DOCTYPE html>
-<html lang="en">
+
+<html>
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ds1 Final Project</title>
 
-  <!-- Bootstrap CSS -->
-  <link 
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
-    rel="stylesheet">
-    
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-
-  <style>
-    body {
-      padding-top: 70px;
-      font-family: "Gill Sans", Roboto, sans-serif;
-    }
-  /*  .header-section {
-      text-align: center;
-      padding: 60px 20px;
-      background: #f7f9fc;
-      border-bottom: 1px solid #eee;
-    }
-    .header-section h1 {
-      font-size: 2.8rem;
-      font-weight: 700;
-    }
-    .header-section p {
-      font-size: 1.2rem;
-      color: #555;
-    }  */
-    
-    .header-section {
-      text-align: center;
-      padding: 100px 20px;
-      background-image: url('assets/header-bg.png'); 
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      position: relative;
-      color: white;
-    }
-    
-    .header-section::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.45); /* 黑色透明遮罩 */
-      z-index: 0;
-    }
-    
-    .header-section h1,
-    .header-section p {
-      position: relative;
-      z-index: 1;   /* 让文字显示在遮罩上面 */
-    }
-
-    
-    /* 侧边栏在滚动时保持可见 */
-    .sidebar-sticky {
-      position: sticky;
-      top: 90px;
-    }
-    /* 点击锚点时，给 section 留出 navbar 的高度 */
-    section {
-      scroll-margin-top: 90px;
-      margin-bottom: 40px;
-    }
-    
-    .navbar {
-      background-color: #B0C4F7 !important;
-      overflow: visible;
-    }
-    
-    .navbar-brand,
-    .navbar .nav-link {
-      color: #FFFFFF !important;
-    }
-    
-    .navbar-brand:hover,
-    .navbar .nav-link:hover {
-      color: #000c2e !important;
-    }
-    
-    .list-group-item.active {
-      background-color: #B0C4F7 !important;
-      border-color: #B0C4F7 !important;
-      color: white;
-    }
-    
-    
-    .navbar .dropdown-menu {
-      background-color: #B0C4F7;
-      margin-top: 0px;
-      border-radius: 0 0 8px 8px;
-      border: none;
-      min-width: 6rem;
-    }
-    
-    .navbar .dropdown-item {
-      color: #000c2e;
-    }
-    
-    .navbar .dropdown-item:hover {
-      background-color: #000c2e;
-      color: #FFFFFF;
-    }
-    
-    
-    .sidebar-box {
-      margin-left: -40px;
-    }
-    
-    .right-content {
-      margin-left: 30px;
-    }
-    
-    a {
-      color: #6a74d7;
-    }
-    a:hover {
-      color: #4d54a6;
-    }
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
-  </style>
+
+<title>Citi Bike Usage Patterns: A Data-Driven Analysis of New York’s Bike-Sharing System</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
 </head>
 
 <body>
 
-<!-- 🔵 Navigation Bar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-  <div class="container-fluid">
 
-    <a class="navbar-brand" href="index.html">Home</a>
+<div class="container-fluid main-container">
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
 
-        <li class="nav-item">
-          <a class="nav-link" href="resume.html">Report</a>
-        </li>
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
-        <li class="nav-item">
-          <a class="nav-link" href="https://github.com/Chenchen-7/p8105_final_project" target="_blank">EDA</a>
-        </li>
 
-        <li class="nav-item">
-          <a class="nav-link" href="mailto:ml5308@cumc.columbia.edu">About</a>
-        </li>
 
-        <li class="nav-item">
-          <a class="nav-link" href="dashboard.html">Dataset</a>
-        </li>
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
         
-        <li class="nav-item dropdown">
-          <a 
-            class="nav-link dropdown-toggle" 
-            href="#" 
-            id="navbarDropdown" 
-            role="button" 
-            data-bs-toggle="dropdown"
-            aria-expanded="false">
-            Shiny App
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li>
-              <a class="dropdown-item" href="https://mutili.shinyapps.io/shiny_app/" target="_blank">
-                Interactive Map
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="duration_boxplot_dashboard.html" target="_blank">
-                Dashboard
-              </a>
-            </li>
-          </ul>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="https://github.com/Chenchen-7/p8105_final_project" target="_blank">
-            <i class="fa-brands fa-github fa-lg"></i>
-          </a>
-        </li>
-        
-
       </ul>
-    </div>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="Data_webpage.html">Data</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Shiny App
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="https://mutili.shinyapps.io/shiny_app/">Interactive Map</a>
+    </li>
+    <li>
+      <a href="duration_boxplot_dashboard.html">Dashboard</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Analyses.html">Analyses</a>
+</li>
+<li>
+  <a href="dashboard.html">Report</a>
+</li>
+<li>
+  <a href="mailto:ml5308@cumc.columbia.edu">About Us</a>
+</li>
+<li>
+  <a href="https://github.com/Chenchen-7/p8105_final_project">
+    <span class="fa fa-github fa-lg"></span>
+     
+    
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
 
-  </div>
-</nav>
+<div id="header">
 
-<!-- 🟣 Header Section -->
-<div class="header-section">
-  <h1>Welcome</h1>
-  <p>
-    Citi Bike Usage & Ride Duration Modeling <br>
-    This project analyzes New York City Citi Bike usage patterns during 2024 (especially October).
-  </p>
+
+
+<h1 class="title toc-ignore">Citi Bike Usage Patterns: A Data-Driven
+Analysis of New York’s Bike-Sharing System</h1>
+
 </div>
 
-<!-- 🟢 Main Content with Sidebar + Sections -->
-<div class="container my-5">
-  <div class="row">
 
-    <!-- 左侧：对应正文 section 的侧边栏 -->
-    <div class="col-md-3 mb-3 sidebar-box">
-      <div class="list-group sidebar-sticky">
-        <a href="#overview" class="list-group-item list-group-item-action active">
-          Overview
-        </a>
-        <a href="#resume-section" class="list-group-item list-group-item-action">
-          Data sourse
-        </a>
-        <a href="#github-section" class="list-group-item list-group-item-action">
-          GitHub
-        </a>
-        <a href="#email-section" class="list-group-item list-group-item-action">
-          Email
-        </a>
-        <a href="#dashboard-section" class="list-group-item list-group-item-action">
-          Problem 2 Dashboard
-        </a>
-      </div>
-    </div>
+<div id="background" class="section level3">
+<h3>Background</h3>
+<p>New York City’s Citi Bike system, launched in 2013, has rapidly grown
+into one of the world’s largest bike-sharing networks, with over 25,000
+bikes and 1,500 stations serving millions of riders each year. As a
+flexible mode of transportation, Citi Bike fills the gap between walking
+and public transit, helping address the “last-mile” challenge, reduce
+congestion, and promote low-carbon urban mobility.</p>
+<p>The year 2024 marks a significant period of expansion for the system,
+reflecting evolving travel patterns in a post-pandemic city and ongoing
+improvements in transportation planning. This project analyzes 2024 Citi
+Bike trip data—combined with weather information—to understand patterns
+in ridership, membership differences, temporal trends, commuter versus
+leisure behavior, and station utilization. By comparing usage across
+months and conditions, we identify peak demand periods, behavioral
+shifts, and potential imbalances in supply and demand.</p>
+<p>The insights gained from this analysis support strategies for system
+optimization, including rebalancing, infrastructure development, and
+policies that strengthen sustainable urban transportation in New York
+City.</p>
+<p><br></p>
+</div>
+<div id="video" class="section level3">
+<h3>Video</h3>
+<div class="video-container">
+<iframe src="https://www.youtube.com/watch?v=9kzE8isXlQY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
+</iframe>
+</div>
+<p><br></p>
+</div>
+<div id="initial-questions" class="section level3">
+<h3>Initial Questions</h3>
+<ul>
+<li>How does Citi Bike usage vary across different months of 2024?</li>
+<li>Which stations experience the highest inflow and outflow?</li>
+<li>How do usage behaviors differ between members and casual
+riders?</li>
+<li>To what extent do weather conditions (temperature, precipitation,
+wind) influence ride frequency and ride duration?</li>
+</ul>
+<p><br></p>
+</div>
+<div id="what-we-do" class="section level3">
+<h3>What We Do</h3>
+<ul>
+<li>Collect, clean and integrate the full-year data of 2024 for
+visualization, and compare the monthly data of Citibank bicycle
+stations.</li>
+<li>Collate Citigroup’s bicycle travel data for October 2024 and hourly
+historical weather data to create a consistent and usable dataset for
+exploration and modeling analysis.</li>
+<li>Build predictive models - including linear regression and machine
+learning methods - to assess how weather conditions, rider types,
+bicycle types and weather types affect trip duration and overall system
+usage.</li>
+</ul>
+<p><br></p>
+</div>
+<div id="contact-us" class="section level3">
+<h3>Contact Us</h3>
+<p>Contact us:<br>
+<a href="mailto:ml5308@cumc.columbia.edu">ml5308@cumc.columbia.edu</a><br>
+Visit project website here:<br>
+<a href="https://github.com/Chenchen-7/p8105_final_project" target="_blank">github.com/Chenchen-7/p8105_final_project</a>.</p>
+<div class="tocify-extend-page" data-unique="tocify-extend-page"
+style="height: 0;">
 
-    <!-- 右侧：正文多个 section -->
-    <div class="col-md-9 right-content">
-
-      <section id="overview">
-        <h3>Overview</h3>
-        <p>
-          This project analyzes New York City Citi Bike usage patterns during 2024 (especially October).
-        </p>
-      </section>
-
-      <section id="resume-section">
-        <h3>Data sourse</h3>
-        <p>
-          This project uses the publicly available Citi Bike system data provided by Lyft through the official Citi Bike website:
-          <a href="https://citibikenyc.com/system-data" target="_blank">Citibike data</a>.
-          Weather information was obtained from the Open-Meteo Weather API:
-          <a href="https://open-meteo.com/en/docs" target="_blank">weather data</a>.
-        </p>
-      </section>
-
-      <section id="github-section">
-        <h3>GitHub</h3>
-        <p>
-          Visit project website here:
-          <a href="https://github.com/Chenchen-7/p8105_final_project" target="_blank">github.com/Chenchen-7/p8105_final_project</a>.
-        </p>
-      </section>
-
-      <section id="email-section">
-        <h3>Email</h3>
-        <p>
-          Feel free to reach out to me via email for questions about this assignment,
-          collaboration opportunities, or anything related to biostatistics and data science.
-          <br>
-          <a href="mailto:ml5308@cumc.columbia.edu">ml5308@cumc.columbia.edu</a>
-        </p>
-      </section>
-
-      <section id="dashboard-section">
-        <h3>Problem 2 Dashboard</h3>
-        <p>
-          The interactive visualization and analysis for Problem 2 are available on the
-          <a href="dashboard.html">Problem 2 Dashboard</a>. This dashboard summarizes key findings
-          using plots and tables created in R.
-        </p>
-      </section>
-
-    </div>
-
-  </div>
+</div>
 </div>
 
-<!-- Bootstrap JS -->
-<script 
-  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
 </script>
 
 </body>

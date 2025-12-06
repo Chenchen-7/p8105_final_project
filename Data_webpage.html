@@ -16,7 +16,7 @@
 <script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -64,7 +64,7 @@ if (window.hljs) {
 
 
 
-<link rel="stylesheet" href="styles.css" type="text/css" />
+<link rel="stylesheet" href="style.css" type="text/css" />
 
 
 
@@ -331,22 +331,35 @@ div.tocify {
         <li>
   <a href="Data_webpage.html">Data</a>
 </li>
-<li>
-  <a href="shiny.html">Shiny</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Shiny App
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="https://mutili.shinyapps.io/shiny_app/">Interactive Map</a>
+    </li>
+    <li>
+      <a href="duration_boxplot_dashboard.html">Dashboard</a>
+    </li>
+  </ul>
 </li>
 <li>
-  <a href="analyses.html">Analyses</a>
+  <a href="Analyses.html">Analyses</a>
 </li>
 <li>
-  <a href="report.html">Report</a>
+  <a href="dashboard.html">Report</a>
 </li>
 <li>
-  <a href="team_webpage.html">About Us</a>
+  <a href="mailto:ml5308@cumc.columbia.edu">About Us</a>
 </li>
 <li>
   <a href="https://github.com/Chenchen-7/p8105_final_project">
     <span class="fa fa-github fa-lg"></span>
      
+    
   </a>
 </li>
       </ul>
@@ -371,15 +384,6 @@ div.tocify {
 </div>
 
 
-<style>
-body {
-  font-family: "Gill Sans", Roboto, sans-serif;
-  font-size: 18px;
-}
-h1, h2, h3 {
-  font-family: "Gill Sans", Roboto, sans-serif;
-}
-</style>
 <div id="initial-data" class="section level2">
 <h2>Initial Data</h2>
 <p>Our project uses the publicly available Citi Bike system data

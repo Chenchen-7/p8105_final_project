@@ -2,22 +2,11 @@
 title: "Visualizations"
 output: 
   html_document:
+    css: style.css
     toc: true
     toc_float: true
     code_folding: hide
 ---
-
-```{=html}
-<style>
-body {
-  font-family: "Gill Sans", Roboto, sans-serif;
-  font-size: 18px;
-}
-h1, h2, h3 {
-  font-family: "Gill Sans", Roboto, sans-serif;
-}
-</style>
-```
 
 In this page we will explore a set of Citi Bike usage data and users' usage patterns.
 

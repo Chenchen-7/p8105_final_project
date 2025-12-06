@@ -1,0 +1,160 @@
+/* ===== 全局字体、正文样式 ===== */
+
+body {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, "Microsoft Yahei", sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #222222;
+  background-color: #f7f8fc;
+}
+
+/* 页面主标题（Rmd knit 出来的标题） */
+h1.title {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+/* 小标题整体稍微好看一点 */
+h2, h3, h4 {
+  font-weight: 600;
+  color: #16324f;
+}
+
+/* 段落稍微多一点间距 */
+p {
+  margin-bottom: 0.9em;
+}
+
+/* ===== 顶部导航栏 navbar 颜色 ===== */
+/* rmarkdown 默认用的是 .navbar-default */
+
+.navbar-default {
+  background-color: #16324f;    /* 顶部整条深蓝色 */
+  border-color: #12263a;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+/* 左上角 Home 文字 */
+
+.navbar-default .navbar-brand {
+  color: #f5f5f5;
+  font-weight: 600;
+}
+
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus {
+  color: #ffdd57;
+}
+
+/* 右上角 Data / Shiny App / Analyses 等链接 */
+
+.navbar-default .navbar-nav > li > a {
+  color: #e6e6e6;
+  font-weight: 500;
+}
+
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+  color: #ffdd57;
+}
+
+/* 当前所在页面的高亮样式 */
+
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:hover,
+.navbar-default .navbar-nav > .active > a:focus {
+  color: #ffffff;
+  background-color: #1f4a6e;
+}
+
+/* ===== 浮动目录 toc_float（左侧边栏）样式 ===== */
+
+/* 整个侧边栏盒子 */
+.tocify {
+  background-color: #f5f7fb;      /* 较浅的灰蓝背景 */
+  border-radius: 8px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+/* 目录里的文字 */
+.tocify ul, .tocify li {
+  font-size: 15px;
+}
+
+/* 每一行 item 的样式 */
+.tocify .tocify-item > a {
+  display: block;
+  padding: 6px 20px;
+  color: #444444;
+  text-decoration: none;
+}
+
+/* hover & 当前选中高亮 */
+.tocify .tocify-item.active > a,
+.tocify .tocify-item > a:hover {
+  background-color: #16324f;
+  color: #ffffff;
+}
+
+/* ===== 调整侧边栏的位置 & 正文与侧边栏间距 ===== */
+
+/* 控制侧边栏在页面中的位置 */
+.tocify {
+  top: 90px !important;           /* 离顶部的距离 */
+  left: 60px !important;          /* 离左边的距离，想更靠左就减小这个值 */
+  width: 230px !important;        /* 侧边栏宽度 */
+}
+
+/* 正文内容整体右移，给侧边栏留空间 + 和侧边栏拉开一点距离 */
+.toc-content {
+  padding-left: 290px;            /* 大约 = tocify width + 一点间距 */
+}
+
+/* 小屏幕（手机 / 窄窗口）时让布局恢复正常，避免挤在一起 */
+@media (max-width: 979px) {
+  .tocify {
+    position: static !important;
+    width: 100% !important;
+    box-shadow: none;
+    border-radius: 0;
+    left: 0 !important;
+    top: 0 !important;
+  }
+
+  .toc-content {
+    padding-left: 15px;
+  }
+}
+
+/* ===== 链接颜色（正文里的超链接，比如 github 链接） ===== */
+
+a {
+  color: #1f4a6e;
+}
+
+a:hover, a:focus {
+  color: #ff7f50;
+  text-decoration: none;
+}
+
+/* ===== YouTube 视频自适应宽高 ===== */
+
+.video-container { 
+  position: relative; 
+  padding-bottom: 56.25%;  /* 16:9 比例 */
+  padding-top: 25px; 
+  height: 0; 
+  overflow: hidden; 
+}
+
+.video-container iframe { 
+  position: absolute; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+}
