@@ -1,4 +1,4 @@
-/* ===== 全局字体、正文样式 ===== */
+/* 全局字体 正文样式*/
 
 body {
   font-family: "Segoe UI", "Helvetica Neue", Arial, "Microsoft Yahei", sans-serif;
@@ -8,7 +8,7 @@ body {
   background-color: #f7f8fc;
 }
 
-/* 页面主标题（Rmd knit 出来的标题） */
+/*主标题*/
 h1.title {
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -16,27 +16,26 @@ h1.title {
   margin-bottom: 30px;
 }
 
-/* 小标题整体稍微好看一点 */
+/* 小标题 */
 h2, h3, h4 {
   font-weight: 600;
   color: #16324f;
 }
 
-/* 段落稍微多一点间距 */
+/* 段落间距 */
 p {
   margin-bottom: 0.9em;
 }
 
-/* ===== 顶部导航栏 navbar 颜色 ===== */
-/* rmarkdown 默认用的是 .navbar-default */
+/* navbar 颜色*/
 
 .navbar-default {
-  background-color: #16324f;    /* 顶部整条深蓝色 */
+  background-color: #16324f;
   border-color: #12263a;
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
-/* 左上角 Home 文字 */
+/* 左上角 Home*/
 
 .navbar-default .navbar-brand {
   color: #f5f5f5;
@@ -69,11 +68,11 @@ p {
   background-color: #1f4a6e;
 }
 
-/* ===== 浮动目录 toc_float（左侧边栏）样式 ===== */
+/* toc_float样式 ===== */
 
 /* 整个侧边栏盒子 */
 .tocify {
-  background-color: #f5f7fb;      /* 较浅的灰蓝背景 */
+  background-color: #f5f7fb;
   border-radius: 8px;
   padding-top: 10px;
   padding-bottom: 10px;
@@ -93,28 +92,27 @@ p {
   text-decoration: none;
 }
 
-/* hover & 当前选中高亮 */
+/* hover */
 .tocify .tocify-item.active > a,
 .tocify .tocify-item > a:hover {
   background-color: #16324f;
   color: #ffffff;
 }
 
-/* ===== 调整侧边栏的位置 & 正文与侧边栏间距 ===== */
 
-/* 控制侧边栏在页面中的位置 */
+/* 侧边栏位置 */
 .tocify {
-  top: 90px !important;           /* 离顶部的距离 */
-  left: 60px !important;          /* 离左边的距离，想更靠左就减小这个值 */
-  width: 230px !important;        /* 侧边栏宽度 */
+  top: 90px !important; 
+  left: 60px !important; 
+  width: 230px !important;
 }
 
-/* 正文内容整体右移，给侧边栏留空间 + 和侧边栏拉开一点距离 */
+/* 正文右移 */
 .toc-content {
-  padding-left: 290px;            /* 大约 = tocify width + 一点间距 */
+  padding-left: 290px;
 }
 
-/* 小屏幕（手机 / 窄窗口）时让布局恢复正常，避免挤在一起 */
+
 @media (max-width: 979px) {
   .tocify {
     position: static !important;
@@ -130,7 +128,7 @@ p {
   }
 }
 
-/* ===== 链接颜色（正文里的超链接，比如 github 链接） ===== */
+/*链接颜色*/
 
 a {
   color: #1f4a6e;
@@ -141,11 +139,11 @@ a:hover, a:focus {
   text-decoration: none;
 }
 
-/* ===== YouTube 视频自适应宽高 ===== */
+/* 视频*/
 
 .video-container { 
   position: relative; 
-  padding-bottom: 56.25%;  /* 16:9 比例 */
+  padding-bottom: 56.25%;
   padding-top: 25px; 
   height: 0; 
   overflow: hidden; 
