@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Citi Bike Usage &amp; Ride Duration Modeling</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="Data_webpage.html">Data</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Shiny
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="duration_boxplot_dashboard.html">Dashboard</a>
+    </li>
+    <li>
+      <a href="https://mutili.shinyapps.io/shiny_app/">Shiny app</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Analyses
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Analyses.html">Visualization</a>
+    </li>
+    <li>
+      <a href="web_modeling.html">Modeling</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="web_modeling.html">Report</a>
+</li>
+<li>
+  <a href="Team_webpage.html">About Us</a>
+</li>
+<li>
+  <a href="https://github.com/Chenchen-7/p8105_final_project">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Citi Bike Usage &amp; Ride Duration
+Modeling</h1>
+
+</div>
+
+
+<style>
+body {
+  font-family: "Gill Sans", Roboto, sans-serif;
+  font-size: 18px;
+}
+h1, h2, h3 {
+  font-family: "Gill Sans", Roboto, sans-serif;
+}
+</style>
+<div id="motivation" class="section level1">
+<h1>Motivation</h1>
+<p>New York City’s Citi Bike system has become an integral part of the
+urban transportation landscape, with over 25,000 bikes and 1,500
+stations serving millions of riders annually across Manhattan, Brooklyn,
+Queens, and the Bronx. Since its launch in 2013, the system has
+transformed how New Yorkers navigate the city, offering a flexible
+alternative that fills the gap between subway transit and walking. The
+year 2024 is particularly meaningful as the system continues to expand
+its fleet and coverage across New York City. In this project, we study
+Citi Bike usage patterns throughout 2024 to capture membership, seasonal
+changes, weather influences, commuter versus leisure patterns, and the
+effects of holidays or large events. Comparing monthly data enables us
+to identify peak demand periods, user behavioral trends, and potential
+supply-demand imbalances. By analyzing these trends and visualizing key
+performance metrics, the findings will inform strategies for system
+improvements including rebalancing, infrastructure planning, and
+initiatives that encourage further adoption of sustainable urban
+mobility. As a core element of urban green transportation, shared
+bicycles are pivotal to tackling the “last mile” travel challenge,
+optimizing traffic structures, cutting carbon emissions, and easing
+urban congestion. New York City as an iconic global metropolis with
+intricate transportation networks and diverse mobility needs — offers
+2024 shared bicycle usage data that captures both post-pandemic shifts
+in travel behaviors and the latest advancements in urban traffic
+management. Against this backdrop, this study analyzes 2024 shared
+bicycle usage data in New York City to uncover patterns in riding
+distribution, station utilization, and user travel habits. Its goal is
+to address the gap in recent research while providing actionable
+insights to boost operational sustainability, strengthen coordination
+within urban public transportation systems, and advance green,
+low-carbon urban development.</p>
+</div>
+<div id="related-work" class="section level1">
+<h1>Related work</h1>
+<p>Our analysis was influenced by several sources that explored
+bike-sharing, mobility patterns, and regression modeling. Prior studies
+on Citi Bike ridership, including Javier Lopez Castillo’s “Multiple
+Linear Regression Analysis of Citi Bike Data”, demonstrated how trip
+duration and ridership can be associated with time of day, user type,
+and weather variables. Additional inspiration came from class
+discussions about linear modeling, machine learning, cross-validation,
+and the importance of combining exploratory analysis with predictive
+modeling. Existing transportation research also highlights how
+bike-share systems respond to weather, seasonal changes, and commuter
+flow patterns—topics that guided our choice of variables and modeling
+approach.</p>
+</div>
+<div id="questions" class="section level1">
+<h1>Questions</h1>
+<p>At the start of the project, we focused on a core set of descriptive
+and operational questions:</p>
+<ol style="list-style-type: decimal">
+<li><p>How does Citi Bike usage vary across different months of 2024? We
+expected seasonal patterns related to temperature, tourism, and commuter
+behavior.</p></li>
+<li><p>Which stations experience the highest inflow and outflow? This
+helped identify geographic hotspots and understand where rebalancing
+efforts may be needed.</p></li>
+<li><p>How do usage behaviors differ between members and casual riders?
+We wanted to compare ride duration, frequency, and bike type preference
+between user groups.</p></li>
+<li><p>To what extent do weather conditions influence ride frequency and
+ride duration? Temperature, precipitation, wind speed, and weather codes
+were expected to shape riding decisions.</p></li>
+</ol>
+<p>As we progressed, additional questions naturally emerged: 1. How do
+bike types (classic vs. electric) differ in popularity and usage
+patterns? 2. Do weekends and weekdays show systematically different
+behaviors? 3. Can predictive models (linear regression, random forest,
+gradient boosting) estimate ride duration effectively? 4. Are rider
+behaviors affected differently by weather depending on whether the rider
+is a member or a casual user?</p>
+<p>These new questions led us to incorporate interaction terms, compare
+models using cross-validated MAE, and build visual dashboards to more
+deeply explore temporal, spatial, and behavioral patterns.</p>
+</div>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<div id="raw-data" class="section level3">
+<h3>Raw data</h3>
+<p>Data source: Citi Bike Trip Data This project uses the publicly
+available Citi Bike system data provided by Lyft through the official
+Citi Bike website: “<a href="https://citibikenyc.com/system-data"
+class="uri">https://citibikenyc.com/system-data</a>”</p>
+<p>Weather Data (Open-Meteo API): Weather information was obtained from
+the Open-Meteo Weather API: <a href="https://open-meteo.com/en/docs"
+class="uri">https://open-meteo.com/en/docs</a></p>
+</div>
+<div id="data-cleaning" class="section level3">
+<h3>Data cleaning</h3>
+<p>Data Cleaning and Preparation</p>
+<p>Sampling of Citi Bike Trip Data (12 Months) Each month of 2024
+contains between 2 and 6 Citi Bike CSV files, totaling approximately 50
+million trip records across the year. To make the dataset
+computationally manageable for initial exploratory analysis and
+visualization, we randomly sampled 1,000 observations from each month.
+This produced a balanced dataset of 12,000 trips used for preliminary
+visualizations and descriptive analysis.</p>
+<p>October Data Preparation October contains 6 separate Citi Bike CSV
+files. We randomly selected 1,000 observations from each file (for a
+total of 6,000 October trips) to use for more detailed modeling and
+weather-matched analyses. During preprocessing, timestamps were
+converted to UTC format for consistency and alignment with weather
+data.</p>
+<p>Weather Data Integration Weather information for October 2024 was
+downloaded from the Open-Meteo Historical Weather API, using UTC
+timestamps to ensure consistency with Citi Bike timestamps. The weather
+variables (e.g., temperature, precipitation, wind speed) were merged
+with the October trip data based on matching UTC time.</p>
+<p>Computation of Trip Duration A new variable, duration, was created as
+the difference between ended_at and started_at. The duration was
+converted to seconds for interpretability.</p>
+<p>Outlier Removal and Data Filtering Trips with erroneous or
+unrealistic duration values were excluded. Specifically, we removed
+trips with: duration &lt; 0 minutes (invalid end/start times), and
+duration &gt; 300 minutes (extreme long-duration outliers).</p>
+</div>
+</div>
+<div id="exploratory-analysis" class="section level1">
+<h1>Exploratory analysis</h1>
+<p><img src="results/hourly_usage_pattern.png" /></p>
+<div id="user-behavior-analysis" class="section level2">
+<h2>User Behavior Analysis</h2>
+<p>To compare the behavioral patterns of Citi Bike members and casual
+riders, we analyzed the cleaned 2024 trip dataset with a focus on two
+key indicators: average ride duration and monthly ride counts. The
+visualizations reveal clear and consistent differences between the two
+groups across the entire year.</p>
+<p><img src="results/membership/compare_duration_hist-1.png" /> <img
+src="results/membership/compare_duration_line-1.png" /></p>
+<p>In terms of ride duration, casual riders consistently take longer
+trips than members in every month of 2024. Overall, casual riders
+typically spend between 15 and 21 minutes per trip, whereas members
+maintain a much shorter and more stable range of roughly 10 to 12
+minutes. A noticeable spike in casual ride duration appears around April
+and May, which further widens the gap between the two user types. These
+differences align with the well-established behavioral patterns of Citi
+Bike users: casual riders often engage in leisure, tourism, or
+exploratory rides, which naturally leads to longer trip times, while
+members tend to use bikes for commuting or short point-to-point travel,
+resulting in shorter, more predictable ride durations.</p>
+<p><img src="results/membership/compare_counts_hist-1.png" /></p>
+<p>The pattern becomes even more striking when examining ride frequency.
+Although casual riders spend more time per trip, overall system usage is
+overwhelmingly driven by members. In our dataset, members consistently
+completed around 750 to 850 trips per month, compared with significantly
+fewer trips from casual riders. Furthermore, casual ridership exhibits
+strong seasonality—low in winter, peaking during the summer months, and
+declining again in the fall—while member ridership remains comparatively
+stable throughout the year. This stability reinforces the idea that
+members rely on Citi Bike for routine, utilitarian transportation,
+whereas casual users are more sensitive to weather and seasonal tourism
+patterns.</p>
+<p><img src="results/monthly_ride_duration.png" /> The figure above
+presents the monthly distribution of cycling data over a 12-month
+period. The distribution of Citibike ride durations shows a strong
+seasonal pattern. Winter months have the shortest and most uniform ride
+times, suggesting essential and short-distance travel. As temperatures
+increase in spring and peak in summer, both median duration and
+variability rise, accompanied by more long rides exceeding 100 minutes.
+These patterns indicate that warm weather months encourage longer and
+more diverse cycling activities, while colder seasons constrain both
+duration and behavioral variability.</p>
+</div>
+<div id="bike-type-comparison" class="section level2">
+<h2>Bike Type Comparison</h2>
+<div id="monthly-ride-count-comparison-by-bike-type"
+class="section level3">
+<h3>Monthly ride count comparison by bike type</h3>
+<p><img src="results/monthly_ride_comparison.png" /> Both bike types
+maintain relatively stable usage patterns throughout the year with
+minimal monthly fluctuation. Classic bike usage hits its lowest point in
+July (319 rides), possibly due to excessive heat. The usage of electric
+bikes is approximately twice that of classic bikes, averaging around 650
+and 340 rides per month, respectively. Electric bikes are clearly more
+popular, likely because they require less physical effort and better
+serve practical purposes like commuting.</p>
+</div>
+<div id="average-ride-duration-comparison-by-bike-type"
+class="section level3">
+<h3>Average ride duration comparison by bike type</h3>
+<p><img src="results/average_duration.png" /> Both bike types show clear
+seasonal trends, with longer rides during warmer months (May-October)
+and shorter rides in winter months (January, February, December).
+December shows a dramatic drop for both types, falling to around 9.7
+minutes. The gap is most pronounced in spring/summer (April-July), where
+electric bikes average 0.5-1 minute longer per ride. In fall/winter
+months (September-December), the two converge, with classic bikes
+surpassing electric bikes briefly in September. Electric bikes generally
+have slightly longer average duration than classic bikes during most
+months. This may be because the electric assist enables them to travel
+farther distances comfortably. Classic bike riders maintain more
+consistent duration (11-13.4 minutes), suggesting they use bikes for
+predictable short trips.</p>
+</div>
+<div id="market-share-trend-by-bike-type" class="section level3">
+<h3>Market share trend by bike type</h3>
+<p><img src="results/market_share.png" /> Electric bikes consistently
+dominate the market, holding approximately 65% market share throughout
+the year. Electric bikes gain approximately 4.5 % points of market share
+over the year. Electric bike share gradually increases from 63.5%
+(January) to peak at 68.1% (July), then stabilizes around 66-68% for the
+remainder of the year, while classic bikes experience a corresponding
+decline from 36.5% (January) to a low of 31.9% (July).</p>
+</div>
+<div id="bike-type-preference-by-user-type" class="section level3">
+<h3>Bike type preference by user type</h3>
+<p><img src="results/bike_preference.png" /> Casual riders show a
+stronger preference for electric bikes (71.3%) compared to members
+(64.2%), while members use classic bikes proportionally more (35.8% vs
+28.7%), suggesting members are more willing to engage with traditional
+cycling experiences while casual users prioritize convenience and ease
+of use.</p>
+</div>
+<div id="ride-duration-density-distribution-by-bike-type"
+class="section level3">
+<h3>Ride duration density distribution by bike type</h3>
+<p><img src="results/bike_type_preference.png" /> Both bike types show
+nearly identical ride duration distributions with peaks around 5
+minutes, indicating that despite different technology, users use both
+classic and electric bikes for similarly short, quick trips, likely for
+urban commuting or short-distance travel.</p>
+</div>
+<div id="hourly-usage-pattern-by-bike-type" class="section level3">
+<h3>Hourly usage pattern by bike type</h3>
+<p><img src="results/hourly_usage_pattern.png" /> Both bike types show
+clear commuter patterns with morning (8am) and evening (5pm) peaks, but
+electric bikes demonstrate significantly higher usage throughout the
+day, indicating they are the preferred choice for both commuting and
+general daytime transportation.</p>
+</div>
+</div>
+</div>
+<div id="additional-analysis-model-selection" class="section level1">
+<h1>Additional analysis (Model Selection)</h1>
+<div id="descriptive-statistics" class="section level3">
+<h3>Descriptive statistics</h3>
+<p>We first examined the distribution of the response variable, ride
+duration, in the October 2024 dataset. The raw duration values show a
+strong right-skewed distribution, with most trips concentrated below 20
+minutes and a long tail extending beyond 100 minutes, as shown in the
+histogram. The mean duration is 12.28 minutes, while the median is 9.01
+minutes, indicating that extreme long trips pull the mean upward</p>
+<p><img src="results/ynormal/duration_histogram_original-1.png" /> <img
+src="results/ynormal/duration_qq_original-1.png" /> <img
+src="results/ynormal/duration_qq_log-1.png" /></p>
+</div>
+<div id="correlation-heatmap" class="section level3">
+<h3>Correlation heatmap</h3>
+<p>The correlation heatmap shows that the linear relationships between
+all predictors are extremely weak (all values ≤ 0.21), with weather
+conditions (precipitation and weather code at 0.21) showing the
+strongest. Among all independent variables, the user type shows the most
+noticeable linear relationship with bike duration (with a correlation of
+-0.22), while all other variables, including weather conditions,
+temperature, and wind speed, exhibit only an extremely weak linear
+correlation with riding duration. <img
+src="results/correlation_heatmap_all_variables.png" /></p>
+</div>
+<div id="model-selection" class="section level2">
+<h2>Model Selection</h2>
+<p>Select models from Multiple Linear Regression, Random Forest and
+Gradient Boosting Machine 1. Checking both RMSE and MAE for three
+baseline models
+<code>duration ~ temp_c + wind_speed + precip_mm + weather_code + member_casual + rideable_type</code>
+<img src="results/model_results/three_models.png" /></p>
+<ol start="2" style="list-style-type: decimal">
+<li><p>Checking RMSE and MAE for all three log model
+<code>log_duration ~ temp_c + wind_speed + precip_mm + weather_code + member_casual + rideable_type</code>
+<img src="results/model_results/log_model.png" /></p></li>
+<li><p>Checking RMSE and MAE for all three reduced model
+<code>duration ~ temp_c + member_casual</code> <img
+src="results/model_results/reduced_models.png" /></p></li>
+</ol>
+<p>In this analysis, we use <strong>Mean Absolute Error (MAE)</strong>
+rather than <strong>Root Mean Squared Error (RMSE)</strong> as the
+primary evaluation metric. Trip duration in the Citi Bike data is highly
+right-skewed, with many extreme long-duration trips. Because RMSE
+squares the errors, it is disproportionately influenced by these
+outliers and therefore does not reflect typical prediction accuracy. In
+contrast, MAE weights all errors equally and is robust to skewed
+distributions, making it a more appropriate and interpretable metric for
+evaluating models on this dataset. For these reasons, MAE provides a
+fairer and more stable basis for model comparison.</p>
+<p>Cross validation for three full model with log(duration) <img
+src="results/model_results/CV_all_model.png" /></p>
+<p>Using 5-fold cross-validated MAE on the log-transformed duration
+outcome, we compared linear regression, random forest, and gradient
+boosting models. All three methods achieved very similar predictive
+accuracy, with MAE values around 0.63. Linear regression had the lowest
+cross-validated MAE (0.6263), followed closely by GBM (0.6265), while
+random forest performed slightly worse (0.6287). Given the nearly
+identical performance and the greater interpretability of linear
+regression, we selected the linear regression model for further
+refinement and diagnostic analysis.</p>
+</div>
+<div id="multiple-linear-regression" class="section level2">
+<h2>Multiple Linear Regression</h2>
+<p>We evaluated five candidate linear regression models for predicting
+the log-transformed trip duration. The models differed in their
+inclusion of polynomial terms and interaction terms:</p>
+<p>Base model:
+<code>log(duration) ~ temp_c + wind_speed + precip_mm + weather_code + member_casual + rideable_type + day_typeweekend</code></p>
+<p>lm1: Base model with main effects only</p>
+<p>lm2: Base model + polynomial temperature term</p>
+<p>lm3: Base model + member × weather interaction</p>
+<p>lm4: Polynomial + interaction model</p>
+<p>lm5: Full model with all polynomials and interactions</p>
+<p>Because linear models must balance prediction accuracy,
+interpretability, and parsimony, we compared these models using AIC,
+BIC, and 5-fold cross-validated MAE.</p>
+<ol style="list-style-type: decimal">
+<li><p>AIC Comparison (Lower = Better) AIC penalizes model complexity
+but allows moderately complex models if they improve prediction. <img
+src="results/model_results/AIC.png" /> lm3 achieves the lowest AIC,
+indicating it provides the best balance between fit and complexity. lm4
+and lm5 are slightly worse, suggesting additional polynomial and
+interaction terms do not improve prediction. Simple models (lm1 and lm2)
+perform worse under AIC.</p></li>
+<li><p>BIC Comparison (Lower = Better) BIC penalizes complexity more
+heavily than AIC and often prefers simpler models. <img
+src="results/model_results/BIC.png" /> lm1 has the lowest BIC, clearly
+preferred due to fewer parameters.</p></li>
+</ol>
+<p>Models with higher complexity (lm3–lm5) are heavily penalized.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>CV-MAE Comparison (Prediction Accuracy) To evaluate out-of-sample
+prediction performance, we used 5-fold cross-validation with mean
+absolute error (MAE) on the log(duration) outcome. <img
+src="results/model_results/CV-MAE.png" /> lm3 performs best, with the
+lowest cross-validated MAE. lm1 is close but slightly worse. lm4 and lm5
+suffer from rank deficiency, meaning polynomial+interaction structures
+created multicollinearity and empty factor levels, making them
+unsuitable for CV or reliable interpretation.</li>
+</ol>
+<p>lm3 is selected as the final regression model because it achieves the
+best balance of predictive accuracy, statistical justification,
+interpretability, and stability. It outperforms the base model (lm1) in
+AIC and cross-validated MAE while avoiding the multicollinearity and
+rank-deficiency problems seen in more complex models (lm4 and lm5).</p>
+<ol start="4" style="list-style-type: decimal">
+<li>The final model
+<code>log(duration)∼temp_c+wind_speed+precip_mm+weather_code+member_casual+rideable_type+(member_casual×weather_code)+ day_typeweekend</code>
+N = 5987 Residual SE = 0.777 Adjusted R² = 0.05704</li>
+</ol>
+<p>While R² is low (as expected for human mobility data), the model is
+statistically significant (F = 20.6, p &lt; 2e−16) and captures several
+strong behavioral and weather-related patterns.</p>
+<p><img src="results/model_results/results_1.png" /> <img
+src="results/model_results/results_2.png" /></p>
+<p>A QQ plot confirms that the raw duration values deviate substantially
+from normality, especially in the upper quantiles. To reduce skewness,
+we applied a log transformation using log(duration + 1). After
+transformation, the mean and median become 2.33 and 2.30, much closer
+together, and the QQ plot shows a more linear pattern. <img
+src="results/ynormal/duration_qq_log-1.png" /></p>
+<p>The final model uses a log-transformed trip duration as the outcome
+and includes weather conditions, rider type, bike type, day type, and
+weather–membership interactions.</p>
+<p>Temperature has a positive association with trip duration (β =
+0.0073, p &lt; 0.001), indicating that warmer weather slightly increases
+ride length, while wind speed has a negative effect (β = –0.0026, p =
+0.038), suggesting that stronger winds shorten trips. Several weather
+categories reduce duration compared with clear weather, especially heavy
+rain (weather_code 53, β = –2.63, p = 0.006) and thunderstorms
+(weather_code 63, β = –8.57, p = 0.045).</p>
+<p>Casual riders take significantly longer trips than members (β =
+–0.466, p &lt; 2e-16 on log scale), and electric bikes are associated
+with slightly longer duration (β = 0.078, p &lt; 0.001). Weekend trips
+are about 13.8% longer than weekday trips (exp(0.1291) = 1.138; p &lt;
+0.001).</p>
+<p>Interaction terms show that weather conditions affect casual riders
+differently than members. For example, in weather_code 1, casual riders
+ride 24% longer than members (exp(0.2118) ≈ 1.24; p = 0.009), and
+similar differential effects appear in codes 3 and 53.</p>
+<p>The model explains a modest amount of variation in duration (Adjusted
+R² ≈ 0.057), which is expected for human mobility data. However, the
+included predictors are statistically significant and provide meaningful
+insights into how weather, membership, and day type jointly influence
+trip duration.</p>
+<p><img src="results/model_results/predicted_model.png" /></p>
+</div>
+</div>
+<div id="discussion" class="section level1">
+<h1>Discussion</h1>
+<p>Our research provides a comprehensive view of Citibank’s bicycle
+usage patterns throughout 2024, combining travel-level data with weather
+records to better understand how environmental conditions, user
+characteristics, and time factors influence cycling time and behavior.
+Several consistent themes have emerged in exploratory analysis,
+descriptive statistics, and predictive modeling, providing insights into
+system performance and user decision-making.</p>
+<ol style="list-style-type: decimal">
+<li>User behavior and system utilization</li>
+</ol>
+<p>Looking at the data throughout the year, members and temporary
+passengers show significantly different patterns. The travel time of
+leisure cyclists is usually 30-40% longer than that of members, which is
+in line with expectations: leisure cyclists are more likely to engage in
+leisure, tourism or scenic exploration, while members view Citibank
+bikes as a practical mode of transportation. Although the cycling time
+is longer, the total number of trips made by ordinary users is much
+less, which indicates that the Citibank bicycle system is mainly
+maintained by daily commuters. Seasonal patterns magnify these
+differences: leisure foot traffic surges sharply in warm months, drops
+in winter, while membership foot traffic remains stable throughout the
+year.</p>
+<p>The preference for electric bicycles is also strong and lasting.
+Electric bicycles have always accounted for about two-thirds of all
+rides, which reflects that they are more convenient and can reduce
+physical exertion - especially over long distances or in hilly areas.
+The proportion of members using classic bicycles is higher than that of
+ordinary cyclists, which indicates that familiarity, cost sensitivity or
+commuting habits may have played a role. These trends highlight the
+opportunities for operational planning, such as expanding the
+maintenance capacity of electric bicycles, adjusting charging
+infrastructure, or customizing membership rewards.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Time and geographical layout</li>
+</ol>
+<p>Time analysis shows that the commuting peak occurs significantly at 8
+a.m. and 5 p.m., which is consistent with the working schedule on
+weekdays. Cycling time increases significantly in spring and summer,
+which may reflect the improvement of weather and the increase in leisure
+activities. Spatial analysis confirms that the busiest stations are
+concentrated in Midtown and Lower Manhattan, which are densely
+populated, have a large flow of people and extensive multimodal
+transport connections. The presence of stations on both the “Most
+Popular Pick-up Points” and “Most Popular drop-off Points” lists
+indicates that areas with intense cycling activities may benefit from
+targeted rebalancing efforts.</p>
+<p>These insights are crucial for resource allocation, especially for
+optimizing bicycle allocation, preventing shortages during peak hours,
+and reducing operational pressure at high-traffic sites.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>The influence of weather on cycling time</li>
+</ol>
+<p>The meaningful association between weather variables and cyclical
+behavior is clarified by regression models in terms of their direction
+and magnitude. Temperature has a minor but significant positive impact
+on the duration of the stroke, while higher wind speeds will slightly
+shorten the stroke. Precipitation has greatly reduced the predicted
+duration - especially under moderate and heavy rain conditions, cycling
+activities have almost vanished. This is consistent with the
+well-documented pattern in urban traffic research: bad weather
+conditions suppress the willingness to ride bikes and the length of
+travel.</p>
+<p>The weather also has an important relationship with the type of
+rider. Temporary riders are more sensitive to weather changes. In cloudy
+or rainy conditions, their riding time drops more quickly. However,
+members maintain a relatively stable travel length, except in the worst
+weather categories. These differences may reflect the underlying
+purposes of travel - commuting offers less option, while leisure travel
+responds more strongly to environmental comfort.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>The impact of cycling on weekends and weekdays</li>
+</ol>
+<p>Incorporating weekend metrics into the regression model revealed
+significant behavioral differences on different days of the week. Even
+after adjusting for the weather, the type of bicycle and the category of
+cyclists, the duration of weekend travel is approximately 14% longer
+than that of weekdays. This reflects people’s shift from utilitarian
+travel on weekdays to leisure and exploratory cycling on weekends. The
+interaction between weather types and rider types (as shown in the
+prediction graph) indicates that under favorable weather conditions, the
+weekend effect is most pronounced for leisure riders.</p>
+<ol start="5" style="list-style-type: decimal">
+<li>Predictive Modeling and Interpretation</li>
+</ol>
+<p>Although the final regression model explains the moderate variation
+ratio of travel duration (<code>adjusted R²≈0.057</code>), this is
+expected for human mobility data, where individual decisions are
+influenced by unobserved factors such as emotions, purposes, social
+plans, street traffic, or the proximity of destinations. However, the
+model still possesses statistical robustness and provides an
+interpretable and meaningful relationship between predictors and cycling
+time.</p>
+<div id="limitation" class="section level2">
+<h2>Limitation</h2>
+<p>Although it provides meaningful insights into the usage patterns of
+Citibank bicycles, our analysis has some limitations.</p>
+<p>The ability to perform a complete time series analysis is limited.
+Although we examined monthly and hourly trends, our dataset is sampled
+(1,000 trips per month), and thus is not suitable for full-time
+modeling, such as ARIMA, STL decomposition, long-term prediction, or
+dynamic seasonal detection. A complete time series analysis requires
+over 50 million records starting from 2024 to maintain fine-grained
+temporal continuity.</p>
+<p>Focus on the duration of the trip rather than other outcomes. Our
+prediction model is centered on duration, but other meaningful results -
+such as ride frequency, departure time patterns, or changing station
+demand over time - are not modeled. Investigating how weather, user type
+and bicycle type affect ride time (start_at time) can reveal other
+behavioral insights beyond duration.</p>
+<p>Lack of information on holidays and special events. Our model cannot
+take into account major festivals (such as July 4th), marathons,
+parades, subway disruptions or other large-scale events that have a
+significant impact on bicycle usage. If the event calendar is not merged
+into the dataset, these impacts remain unmeasurable and may lead to
+unexplained changes in foot traffic and duration.</p>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
