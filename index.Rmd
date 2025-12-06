@@ -6,6 +6,7 @@ output:
     toc: true
     toc_float: true
 ---
+![](results/citi-bike.jpg)
 
 ### Background
 
@@ -19,9 +20,11 @@ The insights gained from this analysis support strategies for system optimizatio
 
 
 
-### Video
-![](results/citi-bike.jpg)
-
+### Screencast
+<div class="video-container">
+<iframe src="https://www.youtube.com/embed/svJiIxGv5xo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+<br>
 
 
 ### Initial Questions
