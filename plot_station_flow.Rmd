@@ -12,7 +12,7 @@ library(tidyverse)
 ```
 Read the data
 ```{r}
-citibike = read.csv("/Users/hongdachen/Desktop/p8105_final_project_new/citibike_sample_12k.csv")
+citibike = read.csv("data/citibike_sample_12k.csv")
 ```
 
 ```{r}

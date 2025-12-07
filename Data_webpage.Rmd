@@ -38,7 +38,7 @@ Each month of 2024 contains between 2 and 6 Citi Bike CSV files, totaling approx
 ```{r data import, eval = FALSE}
 months <- sprintf("%02d", 1:12)
 file_paths <- file.path(
-  path.expand("p8105_final_project/Data"),
+  path.expand("p8105_final_project/data"),
   paste0("2024", months, "-citibike-tripdata"),
   paste0("2024", months, "-citibike-tripdata_1.csv")
 )
@@ -65,7 +65,7 @@ citibike_sample_12k <- map_dfr(file_paths, sample_1k_readr)
 October contains 6 separate Citi Bike CSV files. We randomly selected 1,000 observations from each file (for a total of 6,000 October trips) to use for more detailed modeling and weather-matched analyses. During preprocessing, timestamps were converted to UTC format for consistency and alignment with weather data. Then we carry out the screening and elimination of NA.
 ```{r October data, eval = FALSE}
 # Build paths for the 6 October CSVs 
-oct_dir <- "Data/202410-citibike-tripdata"
+oct_dir <- "data/202410-citibike-tripdata"
 oct_paths <- file.path(
   oct_dir,
   paste0("202410-citibike-tripdata_", 1:6, ".csv")
@@ -109,7 +109,7 @@ oct_filtered <- oct_clean %>%
   filter(!is.na(duration), duration > 0, duration < 300)
 write_csv(
   oct_filtered,
-  "Data/october_2024_sample6k_clean.csv"
+  "data/october_2024_sample6k_clean.csv"
 )
 ```
 
@@ -134,7 +134,7 @@ october_data <- october_data %>%
 Weather information for October 2024 was downloaded from the Open-Meteo Historical Weather API, using UTC timestamps to ensure consistency with Citi Bike timestamps. The weather variables (e.g., temperature, precipitation, wind speed) were merged with the October trip data based on matching UTC time.
 ```{r weather data, eval = FALSE}
 weather <- read_csv(
-  "Data/weather.csv",
+  "Data/202410_weatherdata.csv",
   skip = 3,             
   show_col_types = FALSE,
   col_types = cols(   

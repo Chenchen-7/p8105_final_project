@@ -412,7 +412,7 @@ month. This produced a balanced dataset of 12,000 trips used for
 preliminary visualizations and descriptive analysis.</p>
 <pre class="r"><code>months &lt;- sprintf(&quot;%02d&quot;, 1:12)
 file_paths &lt;- file.path(
-  path.expand(&quot;p8105_final_project/Data&quot;),
+  path.expand(&quot;p8105_final_project/data&quot;),
   paste0(&quot;2024&quot;, months, &quot;-citibike-tripdata&quot;),
   paste0(&quot;2024&quot;, months, &quot;-citibike-tripdata_1.csv&quot;)
 )
@@ -442,7 +442,7 @@ preprocessing, timestamps were converted to UTC format for consistency
 and alignment with weather data. Then we carry out the screening and
 elimination of NA.</p>
 <pre class="r"><code># Build paths for the 6 October CSVs 
-oct_dir &lt;- &quot;Data/202410-citibike-tripdata&quot;
+oct_dir &lt;- &quot;data/202410-citibike-tripdata&quot;
 oct_paths &lt;- file.path(
   oct_dir,
   paste0(&quot;202410-citibike-tripdata_&quot;, 1:6, &quot;.csv&quot;)
@@ -486,7 +486,7 @@ oct_filtered &lt;- oct_clean %&gt;%
   filter(!is.na(duration), duration &gt; 0, duration &lt; 300)
 write_csv(
   oct_filtered,
-  &quot;Data/october_2024_sample6k_clean.csv&quot;
+  &quot;data/october_2024_sample6k_clean.csv&quot;
 )</code></pre>
 <p>Because the weather data is recorded hourly, we aligned each trip
 with the correct weather record by truncating the started_at timestamp
@@ -512,7 +512,7 @@ consistency with Citi Bike timestamps. The weather variables (e.g.,
 temperature, precipitation, wind speed) were merged with the October
 trip data based on matching UTC time.</p>
 <pre class="r"><code>weather &lt;- read_csv(
-  &quot;Data/weather.csv&quot;,
+  &quot;Data/202410_weatherdata.csv&quot;,
   skip = 3,             
   show_col_types = FALSE,
   col_types = cols(   
